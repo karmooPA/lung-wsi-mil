@@ -1,0 +1,44 @@
+# Dataset
+data/
+*.svs
+*.tif
+*.tiff
+*.ndpi
+*.mrxs
+
+# Extracted features / model files
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.ckpt
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+
+# macOS / OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+cache/
+
+# Results
+results/*
+!results/.gitkeep
