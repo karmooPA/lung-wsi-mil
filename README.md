@@ -9,14 +9,6 @@ Binary classification of lung pathology whole-slide images:
 - Tumor
 - Normal
 
-## Reference Study
-
-Afonso et al. (2024)
-
-**Multiple Instance Learning for WSI: A Comparative Analysis of Attention-Based Approaches**
-
-Journal of Pathology Informatics.
-
 ## Planned Pipeline
 
 WSI  
