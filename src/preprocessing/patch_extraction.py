@@ -7,16 +7,14 @@ def calculate_average_background_color(
     patch,
     white_threshold=220,
 ):
+    """Estimate a bright RGB background color for padded slide edges."""
     rgba_array = np.asarray(patch.convert("RGBA"))
 
     rgb_array = rgba_array[:, :, :3]
     alpha_channel = rgba_array[:, :, 3]
 
     opaque_mask = alpha_channel > 0
-    bright_mask = np.all(
-        rgb_array >= white_threshold,
-        axis=2,
-    )
+    bright_mask = np.all(rgb_array >= white_threshold, axis=2)
     background_mask = opaque_mask & bright_mask
 
     background_pixels = rgb_array[background_mask]
@@ -32,45 +30,54 @@ def calculate_average_background_color(
 
 
 def rgba_to_rgb(patch):
+    """Composite OpenSlide RGBA output onto a bright tissue-slide background."""
     if patch.mode != "RGBA":
         return patch.convert("RGB")
 
     background_color = calculate_average_background_color(patch)
-
-    background = Image.new(
-        "RGB",
-        patch.size,
-        background_color,
-    )
-
-    background.paste(
-        patch,
-        mask=patch.getchannel("A"),
-    )
-
+    background = Image.new("RGB", patch.size, background_color)
+    background.paste(patch, mask=patch.getchannel("A"))
     return background
 
 
-def extract_patch(
-    slide,
-    level0_x,
-    level0_y,
-    objective_power,
-    target_magnification=5,
-    patch_size=512,
+def get_level_read_size(
+    patch_size,
+    target_downsample,
+    level_downsample,
 ):
-    target_downsample = objective_power / target_magnification
-
-    level = slide.get_best_level_for_downsample(target_downsample)
-
-    level_downsample = slide.level_downsamples[level]
-
+    """Pixels to read at a chosen pyramid level before exact-scale resizing."""
     read_size = int(
         round(
             patch_size
             * target_downsample
             / level_downsample
         )
+    )
+
+    return max(read_size, 1)
+
+
+def extract_patch(
+    slide,
+    level0_x,
+    level0_y,
+    target_downsample,
+    patch_size=512,
+):
+    """
+    Extract one patch at the requested effective magnification.
+
+    OpenSlide may not contain a native level at the exact target scale. We read
+    from the best available pyramid level and resize to patch_size, preserving
+    the requested physical field of view.
+    """
+    level = slide.get_best_level_for_downsample(target_downsample)
+    level_downsample = float(slide.level_downsamples[level])
+
+    read_size = get_level_read_size(
+        patch_size=patch_size,
+        target_downsample=target_downsample,
+        level_downsample=level_downsample,
     )
 
     patch = slide.read_region(
@@ -94,6 +101,7 @@ def calculate_patch_tissue_percentage(
     patch,
     white_threshold=220,
 ):
+    """Estimate tissue percentage using the reference white-background cutoff."""
     patch_array = np.asarray(patch)
 
     white_mask = np.all(
@@ -102,34 +110,33 @@ def calculate_patch_tissue_percentage(
     )
 
     footprint = np.ones((2, 2), dtype=bool)
-
-    white_mask = dilation(
-        white_mask,
-        footprint=footprint,
-    )
+    white_mask = dilation(white_mask, footprint=footprint)
 
     tissue_mask = ~white_mask
-
-    tissue_percentage = tissue_mask.mean() * 100
-
-    return tissue_percentage
+    return float(tissue_mask.mean() * 100)
 
 
 def is_valid_patch(
     tissue_percentage,
     min_tissue_percentage=20.0,
 ):
+    """Reference rule: valid patches contain strictly more than 20% tissue."""
     return tissue_percentage > min_tissue_percentage
 
 
 def filter_valid_patch_coordinates(
     slide,
     level0_coordinates,
-    objective_power,
-    target_magnification=5,
+    target_downsample,
     patch_size=512,
     min_tissue_percentage=20.0,
 ):
+    """
+    Read candidate regions and return coordinates passing the tissue threshold.
+
+    There is intentionally NO minimum number of patches per WSI here. A slide
+    with 1, 10, or 29 valid patches is preserved for downstream processing.
+    """
     valid_patches = []
 
     for level0_x, level0_y in level0_coordinates:
@@ -137,14 +144,11 @@ def filter_valid_patch_coordinates(
             slide=slide,
             level0_x=level0_x,
             level0_y=level0_y,
-            objective_power=objective_power,
-            target_magnification=target_magnification,
+            target_downsample=target_downsample,
             patch_size=patch_size,
         )
 
-        tissue_percentage = calculate_patch_tissue_percentage(
-            patch
-        )
+        tissue_percentage = calculate_patch_tissue_percentage(patch)
 
         if is_valid_patch(
             tissue_percentage,
