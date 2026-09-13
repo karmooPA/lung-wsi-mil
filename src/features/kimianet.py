@@ -5,6 +5,16 @@ import torch.nn as nn
 from torchvision.models import densenet121
 
 
+def get_device():
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+
+    if torch.backends.mps.is_available():
+        return torch.device("mps")
+
+    return torch.device("cpu")
+
+
 class KimiaNetFeatureExtractor(nn.Module):
     def __init__(self):
         super().__init__()
