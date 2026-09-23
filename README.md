@@ -28,3 +28,10 @@ WSI
 ## Status
 
 Project initialization.
+
+## Dataset audit
+
+See [docs/dataset-audit.md](docs/dataset-audit.md) for the reproducible audit,
+source provenance, patient grouping and remaining full-data checks. Run
+`python scripts/inspect_dataset.py` to replay the recorded pilot evidence
+without requiring WSI files. This is not a fresh full-dataset scan.
