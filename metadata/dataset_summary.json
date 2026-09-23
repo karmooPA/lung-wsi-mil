@@ -1,0 +1,147 @@
+{
+  "audit_mode": "recorded",
+  "generated_at_utc": "2026-09-23T10:30:31.245994+00:00",
+  "project_id": "TCGA-LUSC",
+  "expected_slide_count": 694,
+  "inventory_row_count": 694,
+  "file_extension_distribution": {
+    ".svs": 694
+  },
+  "missing_patient_id_count": 0,
+  "class_counts": {
+    "Normal": 347,
+    "Tumor": 347
+  },
+  "unique_patient_count": 373,
+  "patients_per_class": {
+    "Normal": 233,
+    "Tumor": 293
+  },
+  "mixed_label_patient_count": 153,
+  "patient_slide_count_distribution": {
+    "1": 174,
+    "2": 98,
+    "3": 80,
+    "4": 21
+  },
+  "expected_bytes_by_class": {
+    "Normal": 36315235385,
+    "Tumor": 72884338980
+  },
+  "expected_total_bytes": 109199574365,
+  "expected_total_gib": 101.70002874452621,
+  "expected_total_gb": 109.199574365,
+  "expected_size_mb_statistics": {
+    "n": 694,
+    "min": 14.402091,
+    "median": 99.701458,
+    "max": 2260.190185
+  },
+  "local_present_expected": "NA",
+  "expected_slides_with_local_evidence": 2,
+  "current_run_inspected_count": 0,
+  "recorded_inspected_count": 2,
+  "local_presence_unknown_count": 694,
+  "local_missing_expected": "NA",
+  "unexpected_local_files": "NA",
+  "partial_file_count": "NA",
+  "directory_scan_errors_or_skipped_links": [],
+  "local_observed_bytes": "NA",
+  "readable_count": 2,
+  "unreadable_count": 0,
+  "readability_not_tested_count": 692,
+  "local_problem_count": 0,
+  "valid_labels": true,
+  "invalid_label_count": 0,
+  "duplicate_flagged_rows": 0,
+  "duplicate_scope": "logical identity / declared source MD5; actual file MD5 additionally if requested",
+  "verify_md5_requested": false,
+  "md5_pass_count": 2,
+  "md5_fail_count": 0,
+  "metadata_inspected_count": 2,
+  "metadata_not_inspected_count": 692,
+  "metadata_opened_count": 2,
+  "missing_metadata_denominator": "Only slides whose headers actually opened; excludes untested/failed-open files",
+  "missing_fields_among_inspected": {
+    "width": 0,
+    "height": 0,
+    "level_count": 0,
+    "mpp_x": 0,
+    "mpp_y": 0,
+    "objective_power": 0
+  },
+  "objective_power_distribution": {
+    "20.0": 2
+  },
+  "level_count_distribution": {
+    "2": 2
+  },
+  "wsi_numeric_statistics": {
+    "width": {
+      "n": 2,
+      "min": 8000.0,
+      "median": 10000.0,
+      "max": 12000.0
+    },
+    "height": {
+      "n": 2,
+      "min": 8785.0,
+      "median": 9027.0,
+      "max": 9269.0
+    },
+    "mpp_x": {
+      "n": 2,
+      "min": 0.5015,
+      "median": 0.5015,
+      "max": 0.5015
+    },
+    "mpp_y": {
+      "n": 2,
+      "min": 0.5015,
+      "median": 0.5015,
+      "max": 0.5015
+    }
+  },
+  "readiness": "RECORDED_PARTIAL_EVIDENCE_ONLY",
+  "interpretation": {
+    "NA": "Unmeasured, absent or untested: never interpreted as False or zero",
+    "readable": "OpenSlide opens file and decodes 64x64 corner/centre regions at every level; not exhaustive pixel QC",
+    "normal": "Solid Tissue Normal from a cancer cohort; not a healthy-donor designation",
+    "mixed_patient_labels": "Normal and tumor tissue from one patient can coexist; warning for grouped splits, not automatic mislabelling",
+    "split_rule": "Keep every slide of each patient_id in one future train/validation/test partition",
+    "magnification": "Native WSI metadata; planned 5x processing is not the acquired objective power",
+    "duplicate_policy": "Report all matches; never delete or relabel automatically",
+    "observation_scope": "In recorded mode, readable/MD5/geometry describe prior evidence, not newly inspected files; current presence is unknown"
+  },
+  "input_sha256": {
+    "labels": "4db6dbf8545ccfe3b282159eb918b157090ea68d1ff378f4c312ac1c5021f5bc",
+    "manifest": "64dc5aeefdd46073666016cd5671b7ebcf4e2ace34f30d81a42e574aa3859666",
+    "gdc_snapshot": "46a8c9a207f63b248efd8a4b24689766955c986bf2b588b157cda361cb195444"
+  },
+  "recorded_evidence_provenance": {
+    "archive_sha256": "54abb7bf1b5f667dbc2558f8e75290cf9c9effc04ffe242790b60764bfd23e0b",
+    "archive_inventory_sha256": "d93b310abc946a383790a44f21413f6321e3b2538267c358e8d9d86bed7a4ba3",
+    "archive_member": "Lung_WSI_Dataset_Audit/metadata/dataset_inventory.csv",
+    "recorded_at_utc": "2026-09-13T23:33:04.474278+00:00",
+    "software": {
+      "python": "3.12.14",
+      "openslide-python": "1.4.6",
+      "openslide-bin": "4.0.1.2",
+      "Pillow": "12.3.0"
+    },
+    "input_sha256": {
+      "labels": "4db6dbf8545ccfe3b282159eb918b157090ea68d1ff378f4c312ac1c5021f5bc",
+      "manifest": "64dc5aeefdd46073666016cd5671b7ebcf4e2ace34f30d81a42e574aa3859666",
+      "gdc_snapshot": "46a8c9a207f63b248efd8a4b24689766955c986bf2b588b157cda361cb195444"
+    },
+    "limitations": "Imported prior observations only; raw WSI unavailable in this delivery. No new image or checksum verification."
+  },
+  "recorded_evidence_sha256": "a26e1d8680d1cf78fd0714d5798173174a26f0c379e6cd871dfce257d707b96c",
+  "snapshot_crosscheck": "passed",
+  "software": {
+    "python": "3.12.14",
+    "openslide-python": "not installed",
+    "openslide-bin": "not installed",
+    "Pillow": "12.3.0"
+  }
+}

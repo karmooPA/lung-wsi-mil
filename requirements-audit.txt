@@ -1,0 +1,5 @@
+# Python >=3.10. Metadata replay and unit tests use only the standard library.
+# Install these only for fresh WSI scans (64-bit Python).
+openslide-python==1.4.6
+openslide-bin==4.0.1.2
+Pillow==12.3.0
