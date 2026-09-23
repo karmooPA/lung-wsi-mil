@@ -1,0 +1,28 @@
+{
+  "status": "PASSED",
+  "checks": {
+    "snapshot_count": true,
+    "candidate_normal_count": true,
+    "candidate_tumor_count": true,
+    "cohort_count": true,
+    "balanced_labels": true,
+    "all_label_encodings_consistent": true,
+    "patient_barcode_agreement": true,
+    "seed_42_selection_reproduced": true,
+    "all_selected_rows_snapshot_verified": true,
+    "unique_slide_ids": true,
+    "unique_filenames": true,
+    "unique_expected_md5": true
+  },
+  "snapshot_records": 1100,
+  "cohort_records": 694,
+  "selection_algorithm": "random.Random(42).sample(sorted(tumor, key=file_id), 347)",
+  "source_hashes_sha256": {
+    "gdc_manifest_TCGA_LUSC_694.txt": "64dc5aeefdd46073666016cd5671b7ebcf4e2ace34f30d81a42e574aa3859666",
+    "gdc_metadata_snapshot.json": "46a8c9a207f63b248efd8a4b24689766955c986bf2b588b157cda361cb195444",
+    "labels_TCGA_LUSC_694.csv": "4db6dbf8545ccfe3b282159eb918b157090ea68d1ff378f4c312ac1c5021f5bc",
+    "pilot_manifest.txt": "f6b27a74c8b4d4112ecec5f5c74e9e1e6de7aa8c553c1f77c79cda09e868919a",
+    "pilot_observations.json": "a26e1d8680d1cf78fd0714d5798173174a26f0c379e6cd871dfce257d707b96c",
+    "selection_audit.json": "8792b89f2dada6fe20234613c9704541694d4b14d0188d9f0212fdf5abad3091"
+  }
+}

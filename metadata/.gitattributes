@@ -1,0 +1,4 @@
+# Keep the supplied sources byte-identical, including CRLF, on all platforms.
+*.csv text eol=lf
+*.json text eol=lf
+source/* -text whitespace=cr-at-eol

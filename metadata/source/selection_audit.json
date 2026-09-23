@@ -1,0 +1,168 @@
+{
+  "title": "TCGA-LUSC balanced Tissue Slide WSI cohort",
+  "built_at_utc": "2026-09-12T09:58:44.943002+00:00",
+  "source_api": "https://api.gdc.cancer.gov",
+  "gdc_status": {
+    "commit": "8f7c2a51ab0084b216ad1b62a3fae8b945439c53",
+    "data_release": "Data Release 46.0 - August 10, 2026",
+    "data_release_version": {
+      "major": 46,
+      "minor": 0,
+      "release_date": "2026-08-10"
+    },
+    "status": "OK",
+    "tag": "8.5.0",
+    "version": 1
+  },
+  "project_id": "TCGA-LUSC",
+  "normal_filter": {
+    "op": "and",
+    "content": [
+      {
+        "op": "=",
+        "content": {
+          "field": "cases.project.project_id",
+          "value": [
+            "TCGA-LUSC"
+          ]
+        }
+      },
+      {
+        "op": "=",
+        "content": {
+          "field": "data_category",
+          "value": [
+            "Biospecimen"
+          ]
+        }
+      },
+      {
+        "op": "=",
+        "content": {
+          "field": "data_type",
+          "value": [
+            "Slide Image"
+          ]
+        }
+      },
+      {
+        "op": "=",
+        "content": {
+          "field": "data_format",
+          "value": [
+            "SVS"
+          ]
+        }
+      },
+      {
+        "op": "=",
+        "content": {
+          "field": "experimental_strategy",
+          "value": [
+            "Tissue Slide"
+          ]
+        }
+      },
+      {
+        "op": "=",
+        "content": {
+          "field": "access",
+          "value": [
+            "open"
+          ]
+        }
+      },
+      {
+        "op": "=",
+        "content": {
+          "field": "cases.samples.tissue_type",
+          "value": [
+            "Normal"
+          ]
+        }
+      }
+    ]
+  },
+  "tumor_filter": {
+    "op": "and",
+    "content": [
+      {
+        "op": "=",
+        "content": {
+          "field": "cases.project.project_id",
+          "value": [
+            "TCGA-LUSC"
+          ]
+        }
+      },
+      {
+        "op": "=",
+        "content": {
+          "field": "data_category",
+          "value": [
+            "Biospecimen"
+          ]
+        }
+      },
+      {
+        "op": "=",
+        "content": {
+          "field": "data_type",
+          "value": [
+            "Slide Image"
+          ]
+        }
+      },
+      {
+        "op": "=",
+        "content": {
+          "field": "data_format",
+          "value": [
+            "SVS"
+          ]
+        }
+      },
+      {
+        "op": "=",
+        "content": {
+          "field": "experimental_strategy",
+          "value": [
+            "Tissue Slide"
+          ]
+        }
+      },
+      {
+        "op": "=",
+        "content": {
+          "field": "access",
+          "value": [
+            "open"
+          ]
+        }
+      },
+      {
+        "op": "=",
+        "content": {
+          "field": "cases.samples.tissue_type",
+          "value": [
+            "Tumor"
+          ]
+        }
+      }
+    ]
+  },
+  "counts": {
+    "normal_available": 347,
+    "tumor_available": 753,
+    "normal_selected": 347,
+    "tumor_selected": 347,
+    "combined": 694
+  },
+  "selection": {
+    "method": "Sort tumor records by file_id, then random.Random(seed).sample without replacement",
+    "seed": 42,
+    "paper_limitation": "The article does not publish its tumor UUID list or random seed."
+  },
+  "expected_download_size_bytes": 109199574365,
+  "expected_download_size_gib": 101.70002874452621
+}
