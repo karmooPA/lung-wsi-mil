@@ -1,0 +1,83 @@
+# Verified pilot-14 result
+
+Final acceptance run: **PASSED** on 2026-10-02, verified at
+`2026-10-02T01:22:07.405632+00:00`.
+
+- Run fingerprint: `167fb634f79f2fa3`
+- Generating/current pipeline SHA256: `28269852543a7d23552391a3225100c2a6d27b85a0f7b48696a0b5042d8da5ad`
+- Cohort: 14 distinct patients (7 Normal, 7 Tumor)
+- Valid patches: 873 (Normal 598, Tumor 275)
+- Stored views: 2,619 (Original, Aug1, Aug2 for every patch)
+- HDF5 bytes: 1,463,706,258
+- Source integrity: all 14 WSI MD5 values match the frozen inventory
+- Source fidelity: all 873 Original patches were re-extracted and matched pixel-for-pixel
+- Augmentation activity: zero Aug1 or Aug2 views were identical to Original
+- Resume: all 14 slides passed complete semantic validation and resumed without recomputation
+- Scientific reproducibility: all `images`, `coords`, and `tissue_percentage`
+  datasets are bit-identical to the prior successful run; all seven per-slide
+  QC image/table/summary files are also byte-identical
+- Portable checks: 77 tests run, 73 passed, 4 skipped because the separate
+  KimiaNet feature branch is not merged; zero failures
+- Compile, frozen-source validation, recorded-audit replay, dependency consistency,
+  whitespace and independent real-pilot verification: all passed
+
+## Local workspace and evidence
+
+All execution used Ubuntu/WSL, Python 3.12.3 and the tested CPU torch pair.
+The repository remains at `/home/mrage/Codes/Python/lung-wsi-mil`.
+
+- Inputs: `../lung-wsi-mil-inputs/pilot14` (14 WSIs, 2,558,190,772 bytes),
+  copied only from drive M and verified by full-file MD5 before and after relocation
+- Accepted output: `../lung-wsi-mil-outputs/pilot14-final`
+- Acceptance evidence: `pilot14-final/verification.json` and `verification.md`
+- General test evidence: `../lung-wsi-mil-outputs/quality/quality_check_summary.json`
+- Reproducibility evidence: `quality/scientific_reproducibility.json`
+- Visual review: `quality/final_preprocessing_overlays.png` and `final_worst_*.png`
+- Previous accepted snapshot: `../lung-wsi-mil-outputs/archive/pilot14-pre-layout`
+
+Inputs and runtime artifacts are physically outside the repository and excluded
+from Git. The pinned 14-slide cohort, checksums, code, tests and this report are
+tracked. See [workspace-layout.md](workspace-layout.md) for reproduction commands.
+Historical archive metadata is intentionally not rewritten.
+
+## QC interpretation
+
+All 14 preprocessing overlays, five complete augmentation montages and six
+worst-case background/darkness/gradient panels were visually inspected. No
+gross coordinate offset, augmentation-induced blank/black collapse, padding
+or obvious structural corruption was observed. The remaining glass/background,
+black material and source artifacts already exist in Original; the configured
+strict >20% tissue threshold intentionally allows sparse tissue/edge patches.
+Numeric QC was independently recomputed for all 2,619 stored images.
+
+This is engineering/image-pipeline QC, not a clinical pathology assessment or
+a claim about trained-model performance. The pipeline currently ends at
+augmentation; KimiaNet embeddings and MIL training are not included in this run.
+
+HDF5 hashes differ from the archived run because generating-code/source-path
+metadata changed. All scientific datasets and QC outputs remained identical.
+
+## Per-slide artifact hashes
+
+| Slide | Label | Patches | `patch_views.h5` SHA256 |
+| --- | --- | ---: | --- |
+| TCGA-34-2609-11A-01-BS1 | Normal | 99 | `5e7aebf96462d0fd0397363fe67328c9782bb42a31fa5731e5c6bb4a19b5b30f` |
+| TCGA-34-5929-11A-01-TS1 | Normal | 147 | `8c5ddc937e2e8497688601a5732dee3f04ef77038b80715bdfd0a34213e1d5dd` |
+| TCGA-43-5670-11A-01-TS1 | Normal | 28 | `607e299133a5fa63804dc61b961c49af4ecb640a636d0df6e580b69124057faa` |
+| TCGA-60-2704-11A-01-BS1 | Normal | 217 | `1b2f2ae3efe818960851a363c43c7f15d67106e2c963a02b5405d791a7fc5468` |
+| TCGA-60-2724-11A-01-TS1 | Normal | 44 | `1a280743d250db4de44446535433af4f0ddb535a47f42e4a831d76dc1e0670eb` |
+| TCGA-60-2726-11A-01-BS1 | Normal | 43 | `e064b4bc1f6c7048a6226d1d1f90247d6872e3d5be4b71ef70bc49295102d3bf` |
+| TCGA-66-2727-11A-01-BS1 | Normal | 20 | `7f2edcf713212e2fb95a1bc291937a01a0e865c7367b7ec98f89ea8d3c8f27dc` |
+| TCGA-18-3421-01A-01-BS1 | Tumor | 36 | `08092c6d2299a9e6b8a7b287021b80c64f012bceaf7e3e9c4bd6f10eaf76425a` |
+| TCGA-33-AASB-01A-01-TSA | Tumor | 59 | `90db083ab138c3a4648536828229c931cad6b514fad0e3e8cef91d8db606d108` |
+| TCGA-66-2792-01A-01-BS1 | Tumor | 26 | `a414c86a0860b43de924b6b4492337a21b3aff55baa7c3184f7dd30325d329e1` |
+| TCGA-77-7338-01A-01-BS1 | Tumor | 48 | `1bfe17de2015e867c04885430e00f2188cf01b1025f07c0d0c97563e1f2dd4c6` |
+| TCGA-90-7769-01A-01-BS1 | Tumor | 43 | `610524b893aff704a0afa5f5ba19ecb2012b1d2544db0e3fd3ffe1af52b7c6b0` |
+| TCGA-90-A4ED-01A-03-TS3 | Tumor | 18 | `f44eb99bd44d9c67b85fb2e9e03d107806fce98eddb0fb5a497418e2e940e249` |
+| TCGA-O2-A52V-01A-03-TSC | Tumor | 45 | `b384a89f6e1c4849ea6ed33e40abd6fb0c8875458d0f778f2f13893336a8ea29` |
+
+Control-file SHA256 values:
+
+- `run_config.json`: `5cdfedbf5eaf2a4c61f7133e296423918ebefbcd25581629057f1de523f1282b`
+- `selection.csv`: `daaf36abfadb8e3a2ee7d580fee0d7b5dc6217c04dfd69c41ecfa0539f7238ea`
+- `manifest.csv`: `e0fb2ab16a90a8a0142945994044726e839ee530c089e719d44dc3e5bbc71f2d`

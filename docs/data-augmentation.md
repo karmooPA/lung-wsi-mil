@@ -1,9 +1,10 @@
 # Patch augmentation
 
-Base: `feature/wsi-preprocessing` at
-`a3f699f89beb7c7ed958f596877765abbe326ba2`, not main.
-This branch adds augmentation without changing the colleague's preprocessing,
-feature extraction, shared requirements or manual demo.
+This module is the augmentation stage on `main`, immediately after the shared
+WSI preprocessing and patch-extraction code. The production pilot runner also
+adds compact HDF5 storage, complete numeric QC, atomic resume validation and an
+independent verifier. KimiaNet feature extraction remains on its separate
+feature branch and is not silently imported into this stage.
 
 ## Contract and use
 
@@ -53,11 +54,12 @@ not modified by the augmentation code.
 
 ## Installation and tests
 
-Tested with Python 3.12.14, NumPy 2.3.5, Pillow 12.3.0, scikit-image 0.26.0,
+The accepted WSL pilot uses Python 3.12.3, NumPy 2.3.5, Pillow 12.3.0, scikit-image 0.26.0,
 PyTorch 2.14.0 and torchvision 0.29.0, using CPU execution. Use Python 3.12
 for the pinned dependency set. `requirements-augmentation.txt` includes the
 existing OpenSlide/Pillow requirements, required array/image/torch libraries,
-and h5py 3.16.0 for the optional KimiaNet integration test.
+and h5py 3.16.0 for required compact pilot storage/validation and the optional
+KimiaNet integration tests.
 
 ```bash
 python -m venv .venv
@@ -70,15 +72,18 @@ python -m unittest discover -s tests -p 'test_augmentation*.py' -v
 For a CPU-only environment, install the matching torch/torchvision pair from
 the official CPU index first, then the requirements file. For CUDA use a
 compatible official PyTorch wheel pair for the intended hardware. The tested
-environment used the default +cu130 wheels on CPU; GPU execution was not tested.
+WSL environment uses the +cpu wheels; GPU execution was not tested.
 
 ```bash
 python -m pip install torch==2.14.0 torchvision==0.29.0 --index-url https://download.pytorch.org/whl/cpu
 python -m pip install -r requirements-augmentation.txt
 ```
 
-On this branch, 14 core tests pass and 4 KimiaNet tests skip because those modules
-are absent. On a temporary checkout with KimiaNet `b142bc2`, all 18 tests run:
+The portable suite now covers augmentation, strict HDF5 schema validation,
+corrupt-resume rejection, chunk-size invariance, synthetic preprocessing,
+source identity and patient-leakage guards. Four KimiaNet tests skip on `main`
+because those modules remain on the separate feature branch. On a temporary
+checkout with KimiaNet `b142bc2`, the feature-specific tests also run:
 numeric normalization parity, axis/order preservation, RNG independence and
 repeatability, H/E/D handling, blur semantics, exact rotations/flips, finite
 black/white outputs, strict inputs, empty/singleton batches, the actual
@@ -86,10 +91,9 @@ black/white outputs, strict inputs, empty/singleton batches, the actual
 HDF5 writing, and an untrained KimiaNet forward pass. The known-output stand-in
 encoder checks batching/coordinates; it is not a substitute for trained weights.
 
-Use the narrow test pattern shown above. Existing `tests/test_preprocessing.py`
-is a manual script with hard-coded `/Users/mohammad/...` WSI/output paths and
-side effects on import. It is neither a portable unit test nor run by this
-suite; this branch leaves it unchanged.
+Run the complete portable suite with `python scripts/run_quality_checks.py`.
+`tests/test_preprocessing.py` is now a synthetic, side-effect-free
+unit/integration suite; no developer-specific WSI path is required at collection.
 
 ## Scientific and implementation decisions
 
@@ -161,26 +165,24 @@ slide_id for successive chunks: it returns False after the first write and
 would drop later chunks. This production streaming work is outside the required
 augmentation API and remains an explicit integration task for the feature owner.
 
-## Visual QC and remaining data gate
+## Visual QC and real-data gate
 
-Neither raw WSIs nor `tumor_patch_4096_4096.png` was supplied. The two images in
-the audit package are whole-slide thumbnails, not the requested extracted patch;
-they were not resized/cropped and presented as that patch. The software QC
-panel was generated and visually inspected using a clearly synthetic colour
-pattern: three panels, correct orientation, visible stain-space changes and
-intact image boundaries. Arbitrary RGB patterns are outside the H&E colour
-model, so that exercise cannot establish preservation of tissue morphology.
+The balanced pilot runner creates a tissue-stratified multi-patch montage and
+numeric quality metrics for every stored view. `verify_pilot14.py` checks all
+schemas and coordinates, reconstructs finite normalized tensors, and
+re-extracts sampled Original patches from each source WSI for exact pixel
+comparison. Full source MD5 verification is available for final runs.
 
 On receipt of the actual 512x512 RGB patch, run:
 
 ```bash
-python scripts/preview_augmentation.py /path/to/tumor_patch_4096_4096.png --seed 42 --output results/augmentation/real-patch-qc.png
+python scripts/preview_augmentation.py /path/to/tumor_patch_4096_4096.png --seed 42 --output ../lung-wsi-mil-outputs/augmentation/real-patch-qc.png
 ```
 
 The script verifies shape/dtype/finiteness, denormalizes the three tensors,
 exports a PNG panel and JSON containing the input/output hashes, seed and
 versions. Review stain changes, rotations/flips, tissue structure, edge integrity,
-clipping and blur. Also exercise the real extract_patch -> augmentation ->
-trained KimiaNet path with the intended WSI, magnification and weights. Those
-real-data checks remain open; the PDF's complete Definition of Done is not met.
-All views of every patient's slides must remain in the same future split.
+clipping and blur. The main branch still ends at augmentation storage. KimiaNet
+embeddings and their `[3,N,1024]` feature QC remain a separate next-stage
+integration task. All views of every patient's slides must remain in the same
+future split.

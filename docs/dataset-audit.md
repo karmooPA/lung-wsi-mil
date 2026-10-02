@@ -63,7 +63,7 @@ independently reproducible.
 ## Run
 
 Python 3.10+; no third-party dependency is needed for offline runs or audit tests.
-Run from the repository root. Outputs default to ignored `results/dataset-audit/`
+Run from the repository root. Outputs default to `../lung-wsi-mil-outputs/dataset-audit/`
 so a routine run does not overwrite the committed handoff.
 
 ```bash
@@ -87,9 +87,9 @@ python -m pip install -r requirements-audit.txt
 # Complete dataset root; expected-but-absent files are missing:
 python scripts/inspect_dataset.py --mode local --data-root /path/to/TCGA_LUSC_WSI --verify-md5 --strict
 # A deliberately small sample; unobserved cohort members stay untested:
-python scripts/inspect_dataset.py --mode evidence --data-root /path/to/pilot --verify-md5 --output-dir results/pilot
+python scripts/inspect_dataset.py --mode evidence --data-root /path/to/pilot --verify-md5 --output-dir ../lung-wsi-mil-outputs/audit-pilot
 # Ignore all historical image evidence and inspect only source metadata:
-python scripts/inspect_dataset.py --mode metadata --output-dir results/cohort-only
+python scripts/inspect_dataset.py --mode metadata --output-dir ../lung-wsi-mil-outputs/audit-cohort-only
 ```
 
 On Windows, use 64-bit Python and a quoted path, e.g. `--data-root "D:/TCGA_LUSC_WSI"`.

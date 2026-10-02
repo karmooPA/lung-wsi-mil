@@ -24,6 +24,7 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 
 PROJECT = Path(__file__).resolve().parents[1]
+DEFAULT_OUTPUT_ROOT = PROJECT.parent / f"{PROJECT.name}-outputs"
 SOURCE = PROJECT / "metadata" / "source"
 NA = "NA"
 EXTENSIONS = {".svs", ".tif", ".tiff", ".ndpi", ".mrxs"}
@@ -605,7 +606,7 @@ def main(argv=None):
     parser.add_argument("--data-root", type=Path, help="Actual dataset root, required for local/evidence modes")
     parser.add_argument("--labels", type=Path, default=SOURCE/"labels_TCGA_LUSC_694.csv")
     parser.add_argument("--manifest", type=Path, default=SOURCE/"gdc_manifest_TCGA_LUSC_694.txt")
-    parser.add_argument("--output-dir", type=Path, default=PROJECT/"results"/"dataset-audit")
+    parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_ROOT/"dataset-audit")
     parser.add_argument("--mode", choices=["local", "metadata", "evidence", "recorded"], default="recorded",
                         help="recorded: replay historical pilot; metadata: no images; evidence: scan a subset; local: complete root")
     parser.add_argument("--recorded-evidence", type=Path, help="Versioned pilot observations JSON (recorded mode only)")

@@ -16,6 +16,14 @@
 # Python
 __pycache__/
 *.py[cod]
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.ruff_cache/
+build/
+dist/
+*.egg-info/
 .venv/
 venv/
 env/
@@ -38,7 +46,7 @@ Thumbs.db
 tmp/
 temp/
 cache/
+*.log
 
 # Results
-results/*
-!results/.gitkeep
+/results/

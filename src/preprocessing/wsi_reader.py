@@ -1,7 +1,11 @@
+import math
+
 import openslide
 
 
 REFERENCE_MPP_TO_MAGNIFICATION_CONSTANT = 10.0
+MAX_MPP_ANISOTROPY = 0.10
+MAX_OBJECTIVE_MPP_DISAGREEMENT = 0.20
 
 
 def open_slide(slide_path):
@@ -41,7 +45,7 @@ def get_slide_info(slide):
 
 
 def _positive(value):
-    return value is not None and value > 0
+    return value is not None and math.isfinite(value) and value > 0
 
 
 def estimate_objective_power_from_mpp(mpp_x, mpp_y):
@@ -54,7 +58,16 @@ def estimate_objective_power_from_mpp(mpp_x, mpp_y):
     if not mpp_values:
         return None
 
-    mean_mpp = sum(mpp_values) / len(mpp_values)
+    if len(mpp_values) == 2:
+        mean_mpp = sum(mpp_values) / 2.0
+        anisotropy = abs(mpp_values[0] - mpp_values[1]) / mean_mpp
+        if anisotropy > MAX_MPP_ANISOTROPY:
+            raise ValueError(
+                "MPP X/Y anisotropy exceeds 10%; a single isotropic extraction "
+                "downsample would not preserve physical scale."
+            )
+    else:
+        mean_mpp = mpp_values[0]
     return REFERENCE_MPP_TO_MAGNIFICATION_CONSTANT / mean_mpp
 
 
@@ -67,7 +80,7 @@ def resolve_target_resolution(slide, slide_info, target_magnification):
     the requested patch size later. This keeps 5x consistent even when the WSI
     has no native 5x pyramid level.
     """
-    if target_magnification <= 0:
+    if not math.isfinite(float(target_magnification)) or target_magnification <= 0:
         raise ValueError("target_magnification must be greater than 0.")
 
     objective_power = slide_info["objective_power"]
@@ -76,7 +89,16 @@ def resolve_target_resolution(slide, slide_info, target_magnification):
         slide_info["mpp_y"],
     )
 
-    if _positive(objective_power):
+    if _positive(objective_power) and _positive(estimated_power):
+        relative_difference = abs(objective_power - estimated_power) / objective_power
+        if relative_difference > MAX_OBJECTIVE_MPP_DISAGREEMENT:
+            raise ValueError(
+                "Objective power and MPP-derived magnification disagree by more "
+                "than 20%; refusing to guess the physical extraction scale."
+            )
+        source_magnification = objective_power
+        source = "objective_power_validated_by_mpp"
+    elif _positive(objective_power):
         source_magnification = objective_power
         source = "objective_power"
     elif _positive(estimated_power):
@@ -98,15 +120,6 @@ def resolve_target_resolution(slide, slide_info, target_magnification):
     best_level = slide.get_best_level_for_downsample(target_downsample)
     best_level_downsample = float(slide.level_downsamples[best_level])
 
-    warning = None
-    if _positive(objective_power) and _positive(estimated_power):
-        relative_difference = abs(objective_power - estimated_power) / objective_power
-        if relative_difference > 0.20:
-            warning = (
-                "Objective power and MPP-derived magnification differ by more "
-                "than 20%. Objective power was used for extraction scale."
-            )
-
     return {
         "source_magnification": float(source_magnification),
         "source_magnification_method": source,
@@ -127,5 +140,5 @@ def resolve_target_resolution(slide, slide_info, target_magnification):
             if _positive(slide_info["mpp_y"])
             else None
         ),
-        "metadata_warning": warning,
+        "metadata_warning": None,
     }

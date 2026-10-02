@@ -1,3 +1,6 @@
+import math
+import numbers
+
 import numpy as np
 
 from src.preprocessing.wsi_reader import (
@@ -30,14 +33,24 @@ def _validate_parameters(
     color_distance_threshold,
     thumbnail_max_size,
 ):
-    if target_magnification <= 0:
+    if isinstance(target_magnification, bool) or not isinstance(target_magnification, numbers.Real):
+        raise TypeError("target_magnification must be a finite number.")
+    if not math.isfinite(float(target_magnification)) or target_magnification <= 0:
         raise ValueError("target_magnification must be greater than 0.")
+    if isinstance(patch_size, bool) or not isinstance(patch_size, numbers.Integral):
+        raise TypeError("patch_size must be an integer.")
     if patch_size <= 0:
         raise ValueError("patch_size must be greater than 0.")
-    if not 0 <= min_tissue_percentage <= 100:
+    if isinstance(min_tissue_percentage, bool) or not isinstance(min_tissue_percentage, numbers.Real):
+        raise TypeError("min_tissue_percentage must be a finite number.")
+    if not math.isfinite(float(min_tissue_percentage)) or not 0 <= min_tissue_percentage <= 100:
         raise ValueError("min_tissue_percentage must be between 0 and 100.")
-    if color_distance_threshold < 0:
+    if isinstance(color_distance_threshold, bool) or not isinstance(color_distance_threshold, numbers.Real):
+        raise TypeError("color_distance_threshold must be a finite number.")
+    if not math.isfinite(float(color_distance_threshold)) or color_distance_threshold < 0:
         raise ValueError("color_distance_threshold cannot be negative.")
+    if isinstance(thumbnail_max_size, bool) or not isinstance(thumbnail_max_size, numbers.Integral):
+        raise TypeError("thumbnail_max_size must be an integer.")
     if thumbnail_max_size <= 0:
         raise ValueError("thumbnail_max_size must be greater than 0.")
 
@@ -52,6 +65,8 @@ def _empty_result(
     cleaned_mask,
     parameters,
     reason,
+    average_tissue_color=None,
+    filtered_mask=None,
 ):
     return {
         "status": "success",
@@ -63,8 +78,12 @@ def _empty_result(
         "scale_x": scale_x,
         "scale_y": scale_y,
         "otsu_threshold": float(otsu_threshold),
-        "average_tissue_color": None,
-        "filtered_mask": np.zeros_like(cleaned_mask, dtype=bool),
+        "average_tissue_color": average_tissue_color,
+        "filtered_mask": (
+            np.zeros_like(cleaned_mask, dtype=bool)
+            if filtered_mask is None
+            else filtered_mask
+        ),
         "candidate_tile_count": 0,
         "valid_patch_count": 0,
         "valid_patches": [],
@@ -156,6 +175,21 @@ def preprocess_slide(
             color_distance,
             threshold=color_distance_threshold,
         )
+
+        if not np.any(filtered_mask):
+            return _empty_result(
+                slide_info=slide_info,
+                resolution=resolution,
+                thumbnail=thumbnail,
+                scale_x=scale_x,
+                scale_y=scale_y,
+                otsu_threshold=otsu_threshold,
+                cleaned_mask=cleaned_mask,
+                parameters=parameters,
+                reason="no_tissue_after_color_filter",
+                average_tissue_color=average_color,
+                filtered_mask=filtered_mask,
+            )
 
         tissue_coordinates = get_tissue_coordinates(filtered_mask)
 

@@ -15,6 +15,9 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src.augmentation.data_augmentations import IMAGENET_MEAN, IMAGENET_STD, transform_patch
 
+PROJECT = Path(__file__).resolve().parents[1]
+DEFAULT_OUTPUT_ROOT = PROJECT.parent / f"{PROJECT.name}-outputs"
+
 
 def make_preview(patch_path, output, seed):
     patch_path, output = Path(patch_path), Path(output)
@@ -52,7 +55,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("patch", type=Path)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--output", type=Path, default=Path("results/augmentation/qc.png"))
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_ROOT / "augmentation" / "qc.png")
     args = parser.parse_args()
     make_preview(args.patch, args.output, args.seed)
     print(f"Saved {args.output} and its JSON provenance; review all three views.")

@@ -5,7 +5,7 @@ import argparse
 import random
 from collections import Counter
 from pathlib import Path
-from inspect_dataset import SOURCE, PROJECT, load_expected, hash_file
+from inspect_dataset import SOURCE, DEFAULT_OUTPUT_ROOT, load_expected, hash_file
 
 
 def validate(source=SOURCE):
@@ -42,7 +42,7 @@ def validate(source=SOURCE):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source', type=Path, default=SOURCE)
-    parser.add_argument('--output', type=Path, default=PROJECT/'results/dataset-audit/source_validation.json')
+    parser.add_argument('--output', type=Path, default=DEFAULT_OUTPUT_ROOT/'dataset-audit/source_validation.json')
     args = parser.parse_args()
     result=validate(args.source)
     path=args.output

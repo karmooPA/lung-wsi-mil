@@ -42,7 +42,7 @@ For a small QC run, add:
 --save-qc
 ```
 
-The runner recursively discovers WSI files, continues after corrupted/unsupported slides, writes an incremental `manifest.csv`, and resumes completed slides automatically when the configuration is unchanged.
+The runner recursively discovers WSI files, continues after corrupted/unsupported slides, writes an incremental atomic `manifest.csv`, and resumes only when configuration, source identity, coordinate artifacts and requested QC files remain valid.
 
 Use `--force` to reprocess completed slides.
 
@@ -60,7 +60,7 @@ The root output directory also contains `manifest.csv`.
 
 ## Magnification handling
 
-Patch coordinates are defined in Level-0 space. The source objective power is used when available. If objective power is missing, source magnification is estimated from MPP using the reference-project convention `magnification ~= 10 / MPP`.
+Patch coordinates are defined in Level-0 space. Objective power is used when it agrees with the MPP-derived magnification. If objective power is missing, source magnification is estimated from MPP using the reference-project convention `magnification ~= 10 / MPP`. The pipeline fails safely instead of guessing when objective and MPP disagree by more than 20% or MPP X/Y anisotropy exceeds 10%.
 
 OpenSlide's best pyramid level is used only for efficient reading; patches are resized so the requested effective magnification is preserved even when the WSI has no native 5x level.
 
