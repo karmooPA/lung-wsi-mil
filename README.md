@@ -34,6 +34,7 @@ Implemented and tested:
 - strict patch QC with no arbitrary minimum patch-count exclusion;
 - deterministic Original/Aug1/Aug2 augmentation;
 - lossless, chunk-readable HDF5 storage for a balanced 14-WSI pilot;
+- full-dataset orchestration with bounded slide workers and per-slide resume;
 - independent artifact verification, source re-extraction checks, resume validation and QC montages.
 
 KimiaNet feature extraction exists on the separate `feature/kimianet-features`
@@ -88,6 +89,17 @@ The runner selects seven Normal and seven Tumor slides from distinct patients,
 writes atomically staged per-slide outputs, and refuses to resume stale or
 corrupt artifacts. See [docs/pilot-14-wsi.md](docs/pilot-14-wsi.md) and the
 [verified pilot result](docs/pilot-14-wsi-results.md).
+
+## Full dataset
+
+Run `scripts/run_wsi_dataset.py` to process every inventory-resolved local WSI,
+then use `scripts/verify_wsi_dataset.py` for independent artifact checks, source
+MD5 validation and Original patch re-extraction. The full-dataset runner allows
+multiple slides per patient and preserves the pilot's Original/Aug1/Aug2 HDF5
+format. Patient-level splitting is still required for later model evaluation.
+
+See [docs/full-dataset.md](docs/full-dataset.md) for Windows and generic commands,
+six-worker execution, progress files and interruption/resume recovery.
 
 ## Dataset audit
 
