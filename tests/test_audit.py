@@ -1,5 +1,6 @@
 """Regression tests for audit failure modes; no real WSI or network required."""
 import csv
+import errno
 import hashlib
 import json
 import shutil
@@ -149,7 +150,12 @@ class AuditTests(unittest.TestCase):
 
     def test_skipped_directory_never_declares_missing(self):
         self.path().unlink()
-        (self.root/'linked').symlink_to(self.base, target_is_directory=True)
+        try:
+            (self.root/'linked').symlink_to(self.base, target_is_directory=True)
+        except OSError as exc:
+            if exc.errno == errno.EPERM or getattr(exc, 'winerror', None) == 1314:
+                self.skipTest(f'Directory symlink privilege is unavailable: {exc}')
+            raise
         summary = self.run_case()
         self.assertEqual(summary['readiness'], 'INCOMPLETE_DIRECTORY_SCAN')
         self.assertEqual(summary['local_missing_expected'], NA)
