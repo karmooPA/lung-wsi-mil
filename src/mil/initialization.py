@@ -1,7 +1,13 @@
 import torch.nn as nn
 
 
-def initialize_weights(model: nn.Module, method: str) -> None:
+def initialize_weights(model: nn.Module, method: str = "xavier") -> None:
+    if method not in ("xavier", "kaiming"):
+        raise ValueError(
+            f"Unsupported initialization method: {method}. "
+            "Expected 'xavier' or 'kaiming'."
+        )
+
     for module in model.modules():
         if isinstance(module, nn.Linear):
             if method == "xavier":
@@ -9,12 +15,6 @@ def initialize_weights(model: nn.Module, method: str) -> None:
 
             elif method == "kaiming":
                 nn.init.kaiming_uniform_(module.weight)
-
-            else:
-                raise ValueError(
-                    f"Unsupported initialization method: {method}. "
-                    "Expected 'xavier' or 'kaiming'."
-                )
 
             if module.bias is not None:
                 nn.init.zeros_(module.bias)

@@ -12,8 +12,9 @@ from src.data.cross_validation import (
 )
 
 
-METADATA_PATH = Path("src/data/dataset_inventory.csv")
-SPLITS_DIR = Path("splits")
+PROJECT = Path(__file__).resolve().parents[1]
+METADATA_PATH = PROJECT / "metadata" / "dataset_inventory.csv"
+SPLITS_DIR = PROJECT / "splits"
 
 
 def test_saved_splits_are_consistent():

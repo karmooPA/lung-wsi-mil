@@ -56,7 +56,7 @@ def main():
     python = sys.executable
     commands = [
         ("Compile Python", [python, "-m", "compileall", "-q", "scripts", "src", "tests"]),
-        ("Unit and integration tests", [python, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py", "-v"]),
+        ("Unit and integration tests", [python, "-m", "pytest", "-q", "tests"]),
         (
             "Frozen source validation",
             [python, "scripts/validate_sources.py", "--output", str(output_dir / "source_validation.json")],

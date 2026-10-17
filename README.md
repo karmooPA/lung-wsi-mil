@@ -37,9 +37,17 @@ Implemented and tested:
 - full-dataset orchestration with bounded slide workers and per-slide resume;
 - independent artifact verification, source re-extraction checks, resume validation and QC montages.
 
-KimiaNet feature extraction exists on the separate `feature/kimianet-features`
-branch and is intentionally not part of `main` yet. The current main-branch
-pipeline ends at augmentation storage.
+The `feature/amil-contract-validation` branch integrates KimiaNet extraction,
+the MIL data layer and AMIL. It adds a bounded streaming feature-cache CLI using
+genuine frozen KimiaNet weights, safe strict checkpoint loading, and AMIL unit,
+initialization and Dataset/DataLoader integration tests. The final acceptance
+runner requires all 14 frozen pilot slides and all 42 full view-bag forwards;
+an ordinary CI skip does not satisfy that gate. Run-specific acceptance evidence
+is recorded separately from this procedure.
+
+Training, optimization, ROC/AUC evaluation and attention heatmaps remain later
+work. AMIL currently returns exactly probability, binary prediction and attention
+weights; its padding-removal helper remains test-only.
 
 ## Environment
 
@@ -100,6 +108,39 @@ format. Patient-level splitting is still required for later model evaluation.
 
 See [docs/full-dataset.md](docs/full-dataset.md) for Windows and generic commands,
 six-worker execution, progress files and interruption/resume recovery.
+
+## KimiaNet and AMIL
+
+Install `requirements-mil.txt` in a separate Python 3.12 environment, keeping
+`torch==2.14.0` paired with `torchvision==0.29.0`. The
+[feature-cache and AMIL validation procedure](docs/amil-validation.md) contains
+CPU and CUDA 13.0 installation commands, upstream KimiaNet checkpoint identity
+and terms, and the complete public model/padding contract. Obtain weights from
+upstream and retain them outside Git; this repository does not redistribute them.
+
+From the Windows server repository directory, after installing the CUDA
+environment and obtaining the genuine checkpoint:
+
+```powershell
+$milPython = '.\.venv\lung-wsi-mil\Scripts\python.exe'
+$featureCache = 'D:\Meraj Rastegar\Outputs\amil-contract\pilot14-kimianet.h5'
+& $milPython scripts/extract_kimianet_features.py `
+  --patch-root 'D:\Meraj Rastegar\Data\TCGA_LUSC_HDF' `
+  --selection metadata/pilot14_selection.csv `
+  --inventory metadata/dataset_inventory.csv `
+  --weights 'D:\Meraj Rastegar\Weights\KimiaNetPyTorchWeights.pth' `
+  --output $featureCache --batch-size 8 --device cuda
+
+& $milPython scripts/validate_amil.py `
+  --pilot14-h5 $featureCache `
+  --output 'D:\Meraj Rastegar\Outputs\amil-contract\amil-validation.json'
+```
+
+Use `--device cpu` with a CPU environment. Extraction `--resume` reuses a
+complete cache only after validating matching provenance and every group;
+interrupted feature stages rerun. The acceptance command exits nonzero for a
+missing real HDF5, any required failure/skip, or incomplete 14-WSI/42-view
+coverage. Keep generated caches and JSON reports outside the source repository.
 
 ## Dataset audit
 

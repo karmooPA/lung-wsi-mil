@@ -1,0 +1,6 @@
+# Python 3.12; retains the tested augmentation/torch dependency pair.
+-r requirements-augmentation.txt
+pandas==2.3.3
+# 1.8 fixes shuffled StratifiedGroupKFold group-index mapping.
+scikit-learn==1.8.0
+pytest==8.4.2

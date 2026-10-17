@@ -61,6 +61,12 @@ class AMIL(nn.Module):
         self,
         x: torch.Tensor,
     ) -> None:
+        if not isinstance(x, torch.Tensor):
+            raise TypeError("AMIL input must be a torch.Tensor.")
+
+        if not x.is_floating_point():
+            raise TypeError("AMIL input must have a floating-point dtype.")
+
         if x.ndim != 2:
             raise ValueError(
                 f"Expected input with shape [N, {self.input_dim}], "
