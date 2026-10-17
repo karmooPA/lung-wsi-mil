@@ -43,7 +43,9 @@ genuine frozen KimiaNet weights, safe strict checkpoint loading, and AMIL unit,
 initialization and Dataset/DataLoader integration tests. The final acceptance
 runner requires all 14 frozen pilot slides and all 42 full view-bag forwards;
 an ordinary CI skip does not satisfy that gate. Run-specific acceptance evidence
-is recorded separately from this procedure.
+is recorded separately from this procedure. The
+[2026-10-17 server acceptance result](docs/amil-validation-results-2026-10-17.md)
+records the genuine 14-slide/42-bag PASS and its source/artifact identities.
 
 Training, optimization, ROC/AUC evaluation and attention heatmaps remain later
 work. AMIL currently returns exactly probability, binary prediction and attention

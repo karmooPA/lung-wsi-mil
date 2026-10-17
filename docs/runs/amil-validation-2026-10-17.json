@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "date": "2026-10-17",
+  "status": "PASS",
+  "tested_commit": "c4ce4a171ba7fde782ef8788f4e4076e90c38ee1",
+  "tested_branch": "feature/amil-contract-validation",
+  "tested_tree_dirty": false,
+  "full_dataset_processing_commit": "cf42b2bf648d73c035ec1bdf850b9c3cc84d61c9",
+  "environment": {
+    "os": "Windows 11 build 26200 AMD64",
+    "python": "3.12.14",
+    "torch": "2.14.0+cu130",
+    "torchvision": "0.29.0+cu130",
+    "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER"
+  },
+  "current_run": {
+    "feature_extraction_device": "cuda",
+    "feature_extraction_batch_size": 8,
+    "feature_extraction_seconds": 55.3891192,
+    "full_bag_validation_device": "cpu",
+    "slides": 14,
+    "normal": 7,
+    "tumor": 7,
+    "patches": 873,
+    "patch_image_views": 2619,
+    "mil_view_bags": 42,
+    "full_forwards_succeeded": 42,
+    "source_views_compared": 42,
+    "min_n": 18,
+    "max_n": 217,
+    "all_inputs_outputs_finite": true,
+    "all_attention_normalized": true
+  },
+  "tests": {
+    "amil": {
+      "run": 34,
+      "passed": 33,
+      "skipped": 1,
+      "failed": 0,
+      "errors": 0
+    },
+    "data_regressions": {
+      "passed": 15,
+      "skipped": 0,
+      "failed": 0
+    },
+    "full_quality": {
+      "passed": 163,
+      "skipped": 1,
+      "failed": 0
+    },
+    "optional_cuda": "PASS",
+    "optional_mps": "SKIP: unavailable",
+    "counts_overlap": true
+  },
+  "existing_cohort_reconciliation": {
+    "previous_processing_date": "2026-10-08",
+    "slides": 694,
+    "normal": 347,
+    "tumor": 347,
+    "patches": 35366,
+    "missing": 0,
+    "unexpected": 0,
+    "identity_errors": 0,
+    "empty_bags": 0,
+    "raw_wsi_md5_and_reextraction_rerun_now": false,
+    "full_cohort_features_generated_now": false
+  },
+  "identities": {
+    "feature_cache_sha256": "fe68ee8b91e99cb48e2b774550f31f3a9495dafa1035e8169d280827e216c047",
+    "feature_cache_bytes": 10238196,
+    "feature_fingerprint": "f2dd073a10e4b9d60e5dec7d0848bf632a34f3de65ef5c2036bf76e966913548",
+    "kimianet_source_commit": "8a2f120999e04e4e18e0057bacbd1b47c27a56be",
+    "official_weights_sha256": "f4972513e308d3197fb940177ca607bb9bb8f82690eadaec1e76190ef8b68375",
+    "frozen_selection_sha256": "297da8c7d4a902f42727c6dc54635c9f5558600ec3f5baf4a267d335a1b73d65",
+    "inventory_sha256": "33ef5ffa9710752ee94944511355c4a0bafa573788e2f48c045b978e32463916",
+    "environment_snapshot_sha256": "4d6334e0e5e69d3b7a7b2c36eb93b591a06d379e6208f0e568ccfceeffb86aa3"
+  },
+  "retained_report_sha256": {
+    "amil-validation.json": "d0a2bad9c782d5461a1c43a5e74e9d764a70aa66ba3e62f0f360094ca792c8a8",
+    "quality-server/quality_check_summary.json": "a10bdd5a716048707023c43b27070133e1fe87388c68d5624c22deea56812668",
+    "cohort-reconciliation.json": "b2741dda4296f4ddf6355865771f49a073f9f9ef63b7ed3cb608afee1c717d0f"
+  },
+  "evidence_location": "D:\\Meraj Rastegar\\Data\\AMIL_Validation_20261017",
+  "training_performed": false,
+  "diagnostic_performance_claimed": false
+}
