@@ -1,4 +1,3 @@
-
 import pytest
 import torch
 from torch import nn
@@ -54,20 +53,14 @@ def make_batch(
     )
 
     for index, bag in enumerate(bags):
-        padded_bags[index, :bag.shape[0]] = bag
-        coordinates[index, :bag.shape[0]] = torch.arange(
-            bag.shape[0]
-        ).unsqueeze(1).expand(-1, 2)
+        padded_bags[index, : bag.shape[0]] = bag
+        coordinates[index, : bag.shape[0]] = torch.arange(bag.shape[0]).unsqueeze(1).expand(-1, 2)
 
     if slide_ids is None:
-        slide_ids = tuple(
-            f"slide-{index}" for index in range(batch_size)
-        )
+        slide_ids = tuple(f"slide-{index}" for index in range(batch_size))
 
     if case_ids is None:
-        case_ids = tuple(
-            f"case-{index}" for index in range(batch_size)
-        )
+        case_ids = tuple(f"case-{index}" for index in range(batch_size))
 
     if augmented is None:
         augmented = [False] * batch_size
@@ -113,17 +106,11 @@ def test_train_batch_returns_expected_metrics():
 
 def test_train_batch_updates_model_parameters():
     model, optimizer = make_model_and_optimizer()
-    before = [
-        parameter.detach().clone()
-        for parameter in model.parameters()
-    ]
+    before = [parameter.detach().clone() for parameter in model.parameters()]
 
     train_batch(model, optimizer, make_valid_batch())
 
-    assert any(
-        not torch.equal(old, new.detach())
-        for old, new in zip(before, model.parameters())
-    )
+    assert any(not torch.equal(old, new.detach()) for old, new in zip(before, model.parameters()))
 
 
 def test_train_batch_removes_padding_before_forward():

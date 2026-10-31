@@ -93,15 +93,13 @@ def test_create_fold_dataloaders():
         }
     )
 
-    train_loader, val_loader, test_loader = (
-        create_fold_dataloaders(
-            dataset=dataset,
-            fold_train_df=fold_train_df,
-            fold_val_df=fold_val_df,
-            test_df=test_df,
-            batch_size=2,
-            num_workers=0,
-        )
+    train_loader, val_loader, test_loader = create_fold_dataloaders(
+        dataset=dataset,
+        fold_train_df=fold_train_df,
+        fold_val_df=fold_val_df,
+        test_df=test_df,
+        batch_size=2,
+        num_workers=0,
     )
 
     assert len(train_loader.dataset) == 3

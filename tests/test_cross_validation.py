@@ -1,7 +1,7 @@
 """Five-fold coverage and leakage checks independent of real WSI files."""
 
-from collections import Counter
 import unittest
+from collections import Counter
 
 import pandas as pd
 
@@ -16,12 +16,17 @@ from lung_wsi_mil.data.splits import REFERENCE_SEEDS, create_patient_aware_split
 class CrossValidationTests(unittest.TestCase):
     @staticmethod
     def metadata():
-        return pd.DataFrame([
-            {"slide_id": f"case_{patient:02d}_{label}",
-             "patient_id": f"case_{patient:02d}", "label": label}
-            for patient in range(40)
-            for label in ("Normal", "Tumor")
-        ])
+        return pd.DataFrame(
+            [
+                {
+                    "slide_id": f"case_{patient:02d}_{label}",
+                    "patient_id": f"case_{patient:02d}",
+                    "label": label,
+                }
+                for patient in range(40)
+                for label in ("Normal", "Tumor")
+            ]
+        )
 
     def test_every_slide_and_patient_is_validation_once_without_test_leakage(self):
         metadata = self.metadata()
@@ -37,14 +42,18 @@ class CrossValidationTests(unittest.TestCase):
                     self.assertTrue(set(fit["patient_id"]).isdisjoint(val["patient_id"]))
                     self.assertTrue(set(val["patient_id"]).isdisjoint(test["patient_id"]))
                     self.assertTrue(set(fit["patient_id"]).isdisjoint(test["patient_id"]))
-                    self.assertEqual(set(fit["slide_id"]) | set(val["slide_id"]), set(train["slide_id"]))
+                    self.assertEqual(
+                        set(fit["slide_id"]) | set(val["slide_id"]), set(train["slide_id"])
+                    )
                     self.assertEqual(len(fit) + len(val), len(train))
                     validation_slides.extend(val["slide_id"])
                     validation_patients.extend(val["patient_id"].unique())
                     pd.testing.assert_frame_equal(fit, same_fold["train"])
                     pd.testing.assert_frame_equal(val, same_fold["val"])
                 self.assertEqual(Counter(validation_slides), Counter(train["slide_id"]))
-                self.assertEqual(Counter(validation_patients), Counter(train["patient_id"].unique()))
+                self.assertEqual(
+                    Counter(validation_patients), Counter(train["patient_id"].unique())
+                )
 
     def test_patient_overlap_is_rejected(self):
         metadata = self.metadata()

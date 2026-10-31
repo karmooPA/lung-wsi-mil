@@ -1,8 +1,8 @@
 """Portable checks of the frozen MIL HDF5 dataset contract."""
 
-from pathlib import Path
 import tempfile
 import unittest
+from pathlib import Path
 
 import h5py
 import numpy as np
@@ -19,8 +19,10 @@ class MILHDF5DatasetTests(unittest.TestCase):
 
     def write_slide(self, slide_id="slide_b", patch_count=3, **overrides):
         values = {
-            "embeddings": np.arange(3 * patch_count * 1024, dtype=np.float32)
-            .reshape(3, patch_count, 1024) / 1024,
+            "embeddings": np.arange(3 * patch_count * 1024, dtype=np.float32).reshape(
+                3, patch_count, 1024
+            )
+            / 1024,
             "coords": np.arange(patch_count * 2, dtype=np.int64).reshape(patch_count, 2),
             "label": np.float32(1),
             "case_id": "patient_b",

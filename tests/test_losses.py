@@ -1,4 +1,3 @@
-
 import math
 
 import pytest
@@ -203,4 +202,3 @@ def test_binary_cross_entropy_rejects_device_mismatch():
             torch.tensor([0.8], device="cuda"),
             torch.tensor([1], device="cpu"),
         )
-

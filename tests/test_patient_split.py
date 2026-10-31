@@ -15,12 +15,17 @@ from lung_wsi_mil.data.splits import (
 class PatientSplitTests(unittest.TestCase):
     @staticmethod
     def metadata():
-        return pd.DataFrame([
-            {"slide_id": f"patient_{patient:02d}_{label}",
-             "patient_id": f"patient_{patient:02d}", "label": label}
-            for patient in range(40)
-            for label in ("Normal", "Tumor")
-        ])
+        return pd.DataFrame(
+            [
+                {
+                    "slide_id": f"patient_{patient:02d}_{label}",
+                    "patient_id": f"patient_{patient:02d}",
+                    "label": label,
+                }
+                for patient in range(40)
+                for label in ("Normal", "Tumor")
+            ]
+        )
 
     def test_reference_splits_are_reproducible_complete_and_patient_disjoint(self):
         metadata = self.metadata()

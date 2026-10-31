@@ -92,4 +92,3 @@ def test_mil_collate_fn():
         True,
         True,
     ]
-    

@@ -131,8 +131,12 @@ class PipelineTests(unittest.TestCase):
 
     def test_slide_is_closed_when_processing_raises(self):
         slide = SyntheticSlide()
-        with mock.patch("lung_wsi_mil.preprocessing.pipeline.open_slide", return_value=slide), mock.patch(
-            "lung_wsi_mil.preprocessing.pipeline.create_thumbnail", side_effect=RuntimeError("boom")
+        with (
+            mock.patch("lung_wsi_mil.preprocessing.pipeline.open_slide", return_value=slide),
+            mock.patch(
+                "lung_wsi_mil.preprocessing.pipeline.create_thumbnail",
+                side_effect=RuntimeError("boom"),
+            ),
         ):
             with self.assertRaisesRegex(RuntimeError, "boom"):
                 preprocess_slide("synthetic.svs")
