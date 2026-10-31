@@ -12,7 +12,7 @@ PROJECT = Path(__file__).resolve().parents[1]
 if str(PROJECT) not in sys.path:
     sys.path.insert(0, str(PROJECT))
 
-from src.data.split_storage import save_all_splits
+from lung_wsi_mil.data.split_storage import save_all_splits
 
 METADATA_PATH = PROJECT / "metadata" / "dataset_inventory.csv"
 OUTPUT_DIR = PROJECT.parent / f"{PROJECT.name}-outputs" / "splits"

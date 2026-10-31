@@ -1,12 +1,13 @@
-from collections.abc import Mapping
+"""Kimianet utilities."""
+
 import hashlib
-from pathlib import Path
 import re
+from collections.abc import Mapping
+from pathlib import Path
 
 import torch
 import torch.nn as nn
 from torchvision.models import densenet121
-
 
 OFFICIAL_SOURCE_COMMIT = "8a2f120999e04e4e18e0057bacbd1b47c27a56be"
 OFFICIAL_WEIGHTS_URL = (
@@ -64,12 +65,12 @@ def load_kimianet_weights(model, weights_path, *, expected_sha256=None):
     weights_path = Path(weights_path)
 
     if not weights_path.is_file():
-        raise FileNotFoundError(
-            f"KimiaNet weights not found: {weights_path}"
-        )
+        raise FileNotFoundError(f"KimiaNet weights not found: {weights_path}")
 
     if expected_sha256 is not None:
-        if not isinstance(expected_sha256, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", expected_sha256):
+        if not isinstance(expected_sha256, str) or not re.fullmatch(
+            r"[0-9a-fA-F]{64}", expected_sha256
+        ):
             raise ValueError("expected_sha256 must be a 64-character hexadecimal digest.")
         digest = hashlib.sha256()
         with weights_path.open("rb") as stream:
@@ -90,15 +91,17 @@ def load_kimianet_weights(model, weights_path, *, expected_sha256=None):
 
     for key, value in state_dict.items():
         if not isinstance(key, str) or not isinstance(value, torch.Tensor):
-            raise ValueError("KimiaNet checkpoint must be a flat mapping of tensor names to tensors.")
+            raise ValueError(
+                "KimiaNet checkpoint must be a flat mapping of tensor names to tensors."
+            )
         if key.startswith("module."):
-            key = key[len("module."):]
+            key = key[len("module.") :]
 
         if key.startswith("model."):
-            key = "features." + key[len("model."):]
+            key = "features." + key[len("model.") :]
 
         elif key.startswith("fc_4."):
-            key = "classifier." + key[len("fc_4."):]
+            key = "classifier." + key[len("fc_4.") :]
 
         if key in converted_state_dict:
             raise ValueError(f"Checkpoint keys collide after KimiaNet name conversion: {key}")

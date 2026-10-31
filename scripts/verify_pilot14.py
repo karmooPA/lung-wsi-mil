@@ -23,9 +23,9 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from scripts.run_14_wsi_pilot import _code_fingerprint
 from src.augmentation.data_augmentations import PATCH_SIZE
 from src.augmentation.storage import REPRESENTATIONS, load_augmented_chunk
-from src.preprocessing.batch_preprocessing import validate_saved_outputs
-from src.preprocessing.patch_extraction import extract_patch
-from src.preprocessing.wsi_reader import open_slide
+from lung_wsi_mil.preprocessing.batch_preprocessing import validate_saved_outputs
+from lung_wsi_mil.preprocessing.patch_extraction import extract_patch
+from lung_wsi_mil.preprocessing.wsi_reader import open_slide
 
 
 QUALITY_NUMERIC_FIELDS = (

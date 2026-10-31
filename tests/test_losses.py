@@ -4,7 +4,7 @@ import math
 import pytest
 import torch
 
-from src.mil.losses import binary_cross_entropy_loss
+from lung_wsi_mil.mil.losses import binary_cross_entropy_loss
 
 
 def test_binary_cross_entropy_returns_expected_value():

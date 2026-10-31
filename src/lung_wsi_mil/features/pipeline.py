@@ -1,7 +1,9 @@
-from src.features.feature_extraction import (
+"""Pipeline utilities."""
+
+from lung_wsi_mil.features.feature_extraction import (
     extract_embeddings_with_coordinates,
 )
-from src.features.hdf5_writer import save_slide_to_hdf5
+from lung_wsi_mil.features.hdf5_writer import save_slide_to_hdf5
 
 
 def process_transformed_slide(

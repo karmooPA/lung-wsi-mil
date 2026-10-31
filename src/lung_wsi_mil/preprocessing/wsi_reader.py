@@ -1,7 +1,8 @@
+"""Wsi reader utilities."""
+
 import math
 
 import openslide
-
 
 REFERENCE_MPP_TO_MAGNIFICATION_CONSTANT = 10.0
 MAX_MPP_ANISOTROPY = 0.10
@@ -31,15 +32,9 @@ def get_slide_info(slide):
         "level_count": slide.level_count,
         "level_dimensions": slide.level_dimensions,
         "level_downsamples": slide.level_downsamples,
-        "mpp_x": to_float(
-            slide.properties.get(openslide.PROPERTY_NAME_MPP_X)
-        ),
-        "mpp_y": to_float(
-            slide.properties.get(openslide.PROPERTY_NAME_MPP_Y)
-        ),
-        "objective_power": to_float(
-            slide.properties.get(openslide.PROPERTY_NAME_OBJECTIVE_POWER)
-        ),
+        "mpp_x": to_float(slide.properties.get(openslide.PROPERTY_NAME_MPP_X)),
+        "mpp_y": to_float(slide.properties.get(openslide.PROPERTY_NAME_MPP_Y)),
+        "objective_power": to_float(slide.properties.get(openslide.PROPERTY_NAME_OBJECTIVE_POWER)),
         "vendor": slide.properties.get(openslide.PROPERTY_NAME_VENDOR),
     }
 

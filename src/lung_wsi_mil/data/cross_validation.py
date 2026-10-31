@@ -1,5 +1,6 @@
-from sklearn.model_selection import StratifiedGroupKFold
+"""Cross validation utilities."""
 
+from sklearn.model_selection import StratifiedGroupKFold
 
 CV_RANDOM_STATE = 42
 N_FOLDS = 5
@@ -10,13 +11,9 @@ def validate_fold_split(
     fold_train_df,
     fold_val_df,
 ):
-    train_patients = set(
-        fold_train_df["patient_id"]
-    )
+    train_patients = set(fold_train_df["patient_id"])
 
-    val_patients = set(
-        fold_val_df["patient_id"]
-    )
+    val_patients = set(fold_val_df["patient_id"])
 
     patient_overlap = train_patients & val_patients
 
@@ -27,13 +24,9 @@ def validate_fold_split(
             f"{sorted(patient_overlap)}"
         )
 
-    train_slides = set(
-        fold_train_df["slide_id"]
-    )
+    train_slides = set(fold_train_df["slide_id"])
 
-    val_slides = set(
-        fold_val_df["slide_id"]
-    )
+    val_slides = set(fold_val_df["slide_id"])
 
     slide_overlap = train_slides & val_slides
 
@@ -45,14 +38,10 @@ def validate_fold_split(
         )
 
     assigned_slides = train_slides | val_slides
-    expected_slides = set(
-        full_train_df["slide_id"]
-    )
+    expected_slides = set(full_train_df["slide_id"])
 
     if assigned_slides != expected_slides:
-        raise ValueError(
-            "Fold does not cover the full Train/CV set."
-        )
+        raise ValueError("Fold does not cover the full Train/CV set.")
 
 
 def create_patient_aware_folds(train_df):

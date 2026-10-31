@@ -5,12 +5,12 @@ import unittest
 
 import pandas as pd
 
-from src.data.cross_validation import (
+from lung_wsi_mil.data.cross_validation import (
     N_FOLDS,
     create_patient_aware_folds,
     validate_fold_split,
 )
-from src.data.splits import REFERENCE_SEEDS, create_patient_aware_split
+from lung_wsi_mil.data.splits import REFERENCE_SEEDS, create_patient_aware_split
 
 
 class CrossValidationTests(unittest.TestCase):

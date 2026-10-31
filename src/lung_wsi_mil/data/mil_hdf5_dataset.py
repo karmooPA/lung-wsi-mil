@@ -1,3 +1,5 @@
+"""Mil hdf5 dataset utilities."""
+
 from pathlib import Path
 
 import h5py
@@ -10,9 +12,7 @@ class MILHDF5Dataset(Dataset):
         self.hdf5_path = Path(hdf5_path)
 
         if not self.hdf5_path.is_file():
-            raise FileNotFoundError(
-                f"HDF5 file not found: {self.hdf5_path}"
-            )
+            raise FileNotFoundError(f"HDF5 file not found: {self.hdf5_path}")
 
         with h5py.File(self.hdf5_path, "r") as file:
             self.slide_ids = sorted(file.keys())
@@ -36,10 +36,7 @@ class MILHDF5Dataset(Dataset):
             missing_keys = required_keys.difference(group.keys())
 
             if missing_keys:
-                raise KeyError(
-                    f"{slide_id}: missing HDF5 datasets: "
-                    f"{sorted(missing_keys)}"
-                )
+                raise KeyError(f"{slide_id}: missing HDF5 datasets: {sorted(missing_keys)}")
 
             embeddings = torch.tensor(
                 group["embeddings"][:],
@@ -60,26 +57,20 @@ class MILHDF5Dataset(Dataset):
 
         if embeddings.ndim != 3:
             raise ValueError(
-                f"{slide_id}: embeddings must be 3D, "
-                f"got shape {tuple(embeddings.shape)}"
+                f"{slide_id}: embeddings must be 3D, got shape {tuple(embeddings.shape)}"
             )
 
         if embeddings.shape[0] != 3:
-            raise ValueError(
-                f"{slide_id}: expected 3 embedding views, "
-                f"got {embeddings.shape[0]}"
-            )
+            raise ValueError(f"{slide_id}: expected 3 embedding views, got {embeddings.shape[0]}")
 
         if embeddings.shape[2] != 1024:
             raise ValueError(
-                f"{slide_id}: expected embedding dimension 1024, "
-                f"got {embeddings.shape[2]}"
+                f"{slide_id}: expected embedding dimension 1024, got {embeddings.shape[2]}"
             )
 
         if coordinates.ndim != 2 or coordinates.shape[1] != 2:
             raise ValueError(
-                f"{slide_id}: expected coords shape [N, 2], "
-                f"got {tuple(coordinates.shape)}"
+                f"{slide_id}: expected coords shape [N, 2], got {tuple(coordinates.shape)}"
             )
 
         if embeddings.shape[1] != coordinates.shape[0]:
@@ -90,16 +81,10 @@ class MILHDF5Dataset(Dataset):
             )
 
         if label.ndim != 0:
-            raise ValueError(
-                f"{slide_id}: label must be a scalar, "
-                f"got shape {tuple(label.shape)}"
-            )
+            raise ValueError(f"{slide_id}: label must be a scalar, got shape {tuple(label.shape)}")
 
         if label.item() not in (0.0, 1.0):
-            raise ValueError(
-                f"{slide_id}: label must be 0 or 1, "
-                f"got {label.item()}"
-            )
+            raise ValueError(f"{slide_id}: label must be 0 or 1, got {label.item()}")
 
         return (
             embeddings,

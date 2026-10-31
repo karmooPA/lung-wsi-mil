@@ -1,29 +1,31 @@
+"""Pipeline utilities."""
+
 import math
 import numbers
 
 import numpy as np
 
-from src.preprocessing.wsi_reader import (
-    open_slide,
-    get_slide_info,
-    resolve_target_resolution,
-)
-from src.preprocessing.thumbnail import create_thumbnail
-from src.preprocessing.tissue_detection import (
-    image_to_array,
-    rgb_to_gray,
-    create_tissue_mask,
-    clean_tissue_mask,
-    get_average_tissue_color,
-    calculate_color_distance,
-    filter_by_color_distance,
-)
-from src.preprocessing.patch_coordinates import (
-    get_tissue_coordinates,
+from lung_wsi_mil.preprocessing.patch_coordinates import (
     get_patch_coordinates,
+    get_tissue_coordinates,
     tile_indices_to_level0_coordinates,
 )
-from src.preprocessing.patch_extraction import filter_valid_patch_coordinates
+from lung_wsi_mil.preprocessing.patch_extraction import filter_valid_patch_coordinates
+from lung_wsi_mil.preprocessing.thumbnail import create_thumbnail
+from lung_wsi_mil.preprocessing.tissue_detection import (
+    calculate_color_distance,
+    clean_tissue_mask,
+    create_tissue_mask,
+    filter_by_color_distance,
+    get_average_tissue_color,
+    image_to_array,
+    rgb_to_gray,
+)
+from lung_wsi_mil.preprocessing.wsi_reader import (
+    get_slide_info,
+    open_slide,
+    resolve_target_resolution,
+)
 
 
 def _validate_parameters(
@@ -41,11 +43,15 @@ def _validate_parameters(
         raise TypeError("patch_size must be an integer.")
     if patch_size <= 0:
         raise ValueError("patch_size must be greater than 0.")
-    if isinstance(min_tissue_percentage, bool) or not isinstance(min_tissue_percentage, numbers.Real):
+    if isinstance(min_tissue_percentage, bool) or not isinstance(
+        min_tissue_percentage, numbers.Real
+    ):
         raise TypeError("min_tissue_percentage must be a finite number.")
     if not math.isfinite(float(min_tissue_percentage)) or not 0 <= min_tissue_percentage <= 100:
         raise ValueError("min_tissue_percentage must be between 0 and 100.")
-    if isinstance(color_distance_threshold, bool) or not isinstance(color_distance_threshold, numbers.Real):
+    if isinstance(color_distance_threshold, bool) or not isinstance(
+        color_distance_threshold, numbers.Real
+    ):
         raise TypeError("color_distance_threshold must be a finite number.")
     if not math.isfinite(float(color_distance_threshold)) or color_distance_threshold < 0:
         raise ValueError("color_distance_threshold cannot be negative.")
@@ -80,9 +86,7 @@ def _empty_result(
         "otsu_threshold": float(otsu_threshold),
         "average_tissue_color": average_tissue_color,
         "filtered_mask": (
-            np.zeros_like(cleaned_mask, dtype=bool)
-            if filtered_mask is None
-            else filtered_mask
+            np.zeros_like(cleaned_mask, dtype=bool) if filtered_mask is None else filtered_mask
         ),
         "candidate_tile_count": 0,
         "valid_patch_count": 0,
@@ -132,9 +136,7 @@ def preprocess_slide(
             target_magnification=target_magnification,
         )
 
-        resolution["level0_patch_size"] = float(
-            patch_size * resolution["target_downsample"]
-        )
+        resolution["level0_patch_size"] = float(patch_size * resolution["target_downsample"])
 
         thumbnail, scale_x, scale_y = create_thumbnail(
             slide,

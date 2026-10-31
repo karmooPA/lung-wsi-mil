@@ -1,3 +1,5 @@
+"""Mil collate utilities."""
+
 import torch
 from torch.nn.utils.rnn import pad_sequence
 
@@ -18,9 +20,7 @@ def mil_collate_fn(batch):
             slide_ids.append(slide_id)
             case_ids.append(case_id)
 
-            is_augmented.append(
-                view_index != 0
-            )
+            is_augmented.append(view_index != 0)
 
     padded_bags = pad_sequence(
         bags,

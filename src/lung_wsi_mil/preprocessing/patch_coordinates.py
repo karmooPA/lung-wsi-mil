@@ -1,3 +1,5 @@
+"""Patch coordinates utilities."""
+
 import numpy as np
 
 

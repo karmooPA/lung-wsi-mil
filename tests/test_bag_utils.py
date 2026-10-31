@@ -2,7 +2,7 @@
 import pytest
 import torch
 
-from src.mil.bag_utils import remove_padding
+from lung_wsi_mil.mil.bag_utils import remove_padding
 
 
 def test_remove_padding_removes_complete_negative_infinity_rows():

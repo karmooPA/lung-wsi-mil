@@ -1,7 +1,9 @@
+"""Qc utilities."""
+
 from pathlib import Path
 
-from PIL import Image, ImageDraw
 import numpy as np
+from PIL import Image, ImageDraw
 
 
 def create_patch_overlay(result, outline="red", width=2):
@@ -39,9 +41,7 @@ def save_qc_images(result, output_dir):
 
     result["thumbnail"].save(thumbnail_path)
 
-    mask_image = Image.fromarray(
-        result["filtered_mask"].astype(np.uint8) * 255
-    )
+    mask_image = Image.fromarray(result["filtered_mask"].astype(np.uint8) * 255)
     mask_image.save(mask_path)
 
     overlay = create_patch_overlay(result)

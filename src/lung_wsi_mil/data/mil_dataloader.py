@@ -1,35 +1,28 @@
+"""Mil dataloader utilities."""
+
 from torch.utils.data import DataLoader, Subset
 
-from src.data.mil_collate import mil_collate_fn
+from lung_wsi_mil.data.mil_collate import mil_collate_fn
 
 
 def create_dataset_subset(
     dataset,
     split_df,
 ):
-    slide_to_index = {
-        slide_id: index
-        for index, slide_id in enumerate(dataset.slide_ids)
-    }
+    slide_to_index = {slide_id: index for index, slide_id in enumerate(dataset.slide_ids)}
 
     requested_slide_ids = split_df["slide_id"].tolist()
 
     missing_slide_ids = [
-        slide_id
-        for slide_id in requested_slide_ids
-        if slide_id not in slide_to_index
+        slide_id for slide_id in requested_slide_ids if slide_id not in slide_to_index
     ]
 
     if missing_slide_ids:
         raise ValueError(
-            "Some split slides are missing from the HDF5 dataset: "
-            f"{missing_slide_ids}"
+            f"Some split slides are missing from the HDF5 dataset: {missing_slide_ids}"
         )
 
-    subset_indices = [
-        slide_to_index[slide_id]
-        for slide_id in requested_slide_ids
-    ]
+    subset_indices = [slide_to_index[slide_id] for slide_id in requested_slide_ids]
 
     return Subset(
         dataset,
@@ -50,6 +43,7 @@ def create_mil_dataloader(
         num_workers=num_workers,
         collate_fn=mil_collate_fn,
     )
+
 
 def create_fold_dataloaders(
     dataset,

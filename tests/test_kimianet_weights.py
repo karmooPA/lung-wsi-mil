@@ -10,7 +10,7 @@ from unittest.mock import patch
 import torch
 from torch import nn
 
-from src.features.kimianet import load_kimianet_weights
+from lung_wsi_mil.features.kimianet import load_kimianet_weights
 
 
 class TinyEncoder(nn.Module):
@@ -62,7 +62,7 @@ class KimiaNetWeightsTests(unittest.TestCase):
     def test_torch_load_is_explicitly_restricted_to_weights_only_on_cpu(self):
         torch.save(self.expected, self.path)
         original_load = torch.load
-        with patch("src.features.kimianet.torch.load", wraps=original_load) as load:
+        with patch("lung_wsi_mil.features.kimianet.torch.load", wraps=original_load) as load:
             load_kimianet_weights(self.model, self.path)
         load.assert_called_once_with(self.path, map_location="cpu", weights_only=True)
 
@@ -70,7 +70,7 @@ class KimiaNetWeightsTests(unittest.TestCase):
         torch.save(self.expected, self.path)
         checksum = hashlib.sha256(self.path.read_bytes()).hexdigest()
         load_kimianet_weights(self.model, self.path, expected_sha256=checksum.upper())
-        with patch("src.features.kimianet.torch.load") as load:
+        with patch("lung_wsi_mil.features.kimianet.torch.load") as load:
             with self.assertRaisesRegex(ValueError, "SHA256 mismatch"):
                 load_kimianet_weights(self.model, self.path, expected_sha256="0" * 64)
             load.assert_not_called()

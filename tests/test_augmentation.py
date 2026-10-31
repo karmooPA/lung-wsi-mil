@@ -11,7 +11,7 @@ from PIL import Image, ImageFilter
 import torch
 
 from src.augmentation import data_augmentations as aug
-from src.preprocessing.patch_extraction import extract_patch
+from lung_wsi_mil.preprocessing.patch_extraction import extract_patch
 from scripts.preview_augmentation import make_preview
 
 

@@ -4,7 +4,7 @@ import unittest
 
 import pandas as pd
 
-from src.data.splits import (
+from lung_wsi_mil.data.splits import (
     REFERENCE_SEEDS,
     create_all_reference_splits,
     create_patient_aware_split,

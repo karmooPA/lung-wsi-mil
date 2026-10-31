@@ -1,19 +1,21 @@
+"""Train padded MIL batches one finite, unpadded view-bag at a time."""
 
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, Optional, Union
+from collections.abc import Iterable
+from typing import Any
 
 import torch
 from torch import nn
 from torch.optim import Optimizer
 
-from src.mil.bag_utils import remove_padding
-from src.mil.losses import binary_cross_entropy_loss
+from lung_wsi_mil.mil.bag_utils import remove_padding
+from lung_wsi_mil.mil.losses import binary_cross_entropy_loss
 
 
 def _resolve_device(
     model: nn.Module,
-    device: Optional[Union[str, torch.device]],
+    device: str | torch.device | None,
 ) -> torch.device:
     if not isinstance(model, nn.Module):
         raise TypeError("model must be a torch.nn.Module.")
@@ -26,21 +28,13 @@ def _resolve_device(
     model_devices = {parameter.device for parameter in parameters}
 
     if len(model_devices) != 1:
-        raise ValueError(
-            "All model parameters must be on the same device."
-        )
+        raise ValueError("All model parameters must be on the same device.")
 
     model_device = next(iter(model_devices))
-    target_device = (
-        model_device
-        if device is None
-        else torch.device(device)
-    )
+    target_device = model_device if device is None else torch.device(device)
 
     if target_device != model_device:
-        raise ValueError(
-            "Move the model to the requested device before training."
-        )
+        raise ValueError("Move the model to the requested device before training.")
 
     return target_device
 
@@ -60,22 +54,15 @@ def _normalize_labels(
     elif labels.ndim == 2 and labels.shape[1] == 1:
         labels = labels.squeeze(1)
     elif labels.ndim != 1:
-        raise ValueError(
-            "labels must have shape [B] or [B, 1]; "
-            f"got {tuple(labels.shape)}."
-        )
+        raise ValueError(f"labels must have shape [B] or [B, 1]; got {tuple(labels.shape)}.")
 
     if labels.numel() != num_bags:
-        raise ValueError(
-            f"Expected {num_bags} labels, got {labels.numel()}."
-        )
+        raise ValueError(f"Expected {num_bags} labels, got {labels.numel()}.")
 
     if not torch.isfinite(labels).all().item():
         raise ValueError("labels contain NaN or Inf.")
 
-    if not torch.all(
-        (labels == 0) | (labels == 1)
-    ).item():
+    if not torch.all((labels == 0) | (labels == 1)).item():
         raise ValueError("labels must contain only 0 and 1.")
 
     return labels
@@ -106,30 +93,20 @@ def _prepare_batch(
         raise TypeError("padded_bags must be a torch.Tensor.")
 
     if not padded_bags.is_floating_point():
-        raise TypeError(
-            "padded_bags must have a floating-point dtype."
-        )
+        raise TypeError("padded_bags must have a floating-point dtype.")
 
     if padded_bags.ndim != 3:
-        raise ValueError(
-            "padded_bags must have shape [B, N, D]; "
-            f"got {tuple(padded_bags.shape)}."
-        )
+        raise ValueError(f"padded_bags must have shape [B, N, D]; got {tuple(padded_bags.shape)}.")
 
     num_bags, max_instances, feature_dim = padded_bags.shape
 
     if num_bags == 0 or max_instances == 0 or feature_dim == 0:
-        raise ValueError(
-            "padded_bags must have non-zero dimensions."
-        )
+        raise ValueError("padded_bags must have non-zero dimensions.")
 
     expected_dim = getattr(model, "input_dim", None)
 
     if expected_dim is not None and feature_dim != expected_dim:
-        raise ValueError(
-            f"Expected feature dimension {expected_dim}, "
-            f"got {feature_dim}."
-        )
+        raise ValueError(f"Expected feature dimension {expected_dim}, got {feature_dim}.")
 
     if not isinstance(coordinates, torch.Tensor):
         raise TypeError("coordinates must be a torch.Tensor.")
@@ -140,10 +117,7 @@ def _prepare_batch(
         or coordinates.shape[1] != max_instances
         or coordinates.shape[2] != 2
     ):
-        raise ValueError(
-            "coordinates must have shape [B, N, 2] "
-            "matching padded_bags."
-        )
+        raise ValueError("coordinates must have shape [B, N, 2] matching padded_bags.")
 
     if not isinstance(slide_ids, (tuple, list)):
         raise TypeError("slide_ids must be a sequence.")
@@ -152,9 +126,7 @@ def _prepare_batch(
         raise TypeError("case_ids must be a sequence.")
 
     if len(slide_ids) != num_bags or len(case_ids) != num_bags:
-        raise ValueError(
-            "slide_ids and case_ids must contain one entry per bag."
-        )
+        raise ValueError("slide_ids and case_ids must contain one entry per bag.")
 
     if not all(isinstance(slide_id, str) for slide_id in slide_ids):
         raise TypeError("Every slide_id must be a string.")
@@ -169,9 +141,7 @@ def _prepare_batch(
         raise TypeError("is_augmented must have dtype torch.bool.")
 
     if is_augmented.shape != (num_bags,):
-        raise ValueError(
-            "is_augmented must have shape [B] matching padded_bags."
-        )
+        raise ValueError("is_augmented must have shape [B] matching padded_bags.")
 
     labels = _normalize_labels(labels, num_bags)
 
@@ -185,13 +155,11 @@ def train_batch(
     model: nn.Module,
     optimizer: Optimizer,
     batch: Any,
-    device: Optional[Union[str, torch.device]] = None,
+    device: str | torch.device | None = None,
     eps: float = 1e-5,
-) -> Dict[str, Union[float, int]]:
+) -> dict[str, float | int]:
     if not isinstance(optimizer, Optimizer):
-        raise TypeError(
-            "optimizer must be an instance of torch.optim.Optimizer."
-        )
+        raise TypeError("optimizer must be an instance of torch.optim.Optimizer.")
 
     target_device = _resolve_device(model, device)
 
@@ -216,9 +184,7 @@ def train_batch(
         output = model(bag)
 
         if not isinstance(output, (tuple, list)) or len(output) != 3:
-            raise ValueError(
-                "AMIL must return (y_prob, y_hat, attention_weights)."
-            )
+            raise ValueError("AMIL must return (y_prob, y_hat, attention_weights).")
 
         y_prob = output[0]
 
@@ -226,19 +192,13 @@ def train_batch(
             raise TypeError("AMIL y_prob must be a torch.Tensor.")
 
         if not y_prob.is_floating_point():
-            raise TypeError(
-                "AMIL y_prob must have a floating-point dtype."
-            )
+            raise TypeError("AMIL y_prob must have a floating-point dtype.")
 
         if y_prob.numel() != 1:
-            raise ValueError(
-                "AMIL must return exactly one probability per bag."
-            )
+            raise ValueError("AMIL must return exactly one probability per bag.")
 
         if y_prob.device != target_device:
-            raise ValueError(
-                "AMIL output and model parameters must use the same device."
-            )
+            raise ValueError("AMIL output and model parameters must use the same device.")
 
         probabilities.append(y_prob.reshape(1))
 
@@ -251,9 +211,7 @@ def train_batch(
     )
 
     if not torch.isfinite(loss).item():
-        raise FloatingPointError(
-            "Training loss is not finite."
-        )
+        raise FloatingPointError("Training loss is not finite.")
 
     loss.backward()
     optimizer.step()
@@ -269,13 +227,11 @@ def train_one_epoch(
     model: nn.Module,
     dataloader: Iterable[Any],
     optimizer: Optimizer,
-    device: Optional[Union[str, torch.device]] = None,
+    device: str | torch.device | None = None,
     eps: float = 1e-5,
-) -> Dict[str, Union[float, int]]:
+) -> dict[str, float | int]:
     if not isinstance(optimizer, Optimizer):
-        raise TypeError(
-            "optimizer must be an instance of torch.optim.Optimizer."
-        )
+        raise TypeError("optimizer must be an instance of torch.optim.Optimizer.")
 
     if not hasattr(dataloader, "__iter__"):
         raise TypeError("dataloader must be iterable.")
@@ -306,9 +262,7 @@ def train_one_epoch(
         total_slides += int(batch_result["num_slides"])
 
     if total_batches == 0 or total_bags == 0:
-        raise ValueError(
-            "The training dataloader produced no bags."
-        )
+        raise ValueError("The training dataloader produced no bags.")
 
     return {
         "loss": total_loss / total_bags,

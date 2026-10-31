@@ -1,7 +1,9 @@
+"""Single-bag attention MIL with a probability, prediction, and attention output."""
+
 import torch
 import torch.nn as nn
 
-from src.mil.initialization import initialize_weights
+from lung_wsi_mil.mil.initialization import initialize_weights
 
 
 class AMIL(nn.Module):
@@ -22,14 +24,10 @@ class AMIL(nn.Module):
             raise ValueError("attention_dim must be greater than 0.")
 
         if k != 1:
-            raise ValueError(
-                "This AMIL implementation supports only k=1."
-            )
+            raise ValueError("This AMIL implementation supports only k=1.")
 
         if not 0.0 <= threshold <= 1.0:
-            raise ValueError(
-                "threshold must be between 0 and 1."
-            )
+            raise ValueError("threshold must be between 0 and 1.")
 
         self.input_dim = input_dim
         self.attention_dim = attention_dim
@@ -74,15 +72,10 @@ class AMIL(nn.Module):
             )
 
         if x.shape[1] != self.input_dim:
-            raise ValueError(
-                f"Expected feature dimension {self.input_dim}, "
-                f"but got {x.shape[1]}."
-            )
+            raise ValueError(f"Expected feature dimension {self.input_dim}, but got {x.shape[1]}.")
 
         if x.shape[0] == 0:
-            raise ValueError(
-                "AMIL received an empty bag with zero instances."
-            )
+            raise ValueError("AMIL received an empty bag with zero instances.")
 
         if not torch.isfinite(x).all():
             raise ValueError(
@@ -96,9 +89,7 @@ class AMIL(nn.Module):
     ) -> torch.Tensor:
         attention_hidden = self.attention_hidden(x)
 
-        attention_scores = self.attention_score(
-            attention_hidden
-        )
+        attention_scores = self.attention_score(attention_hidden)
 
         attention_scores = attention_scores.transpose(
             1,
@@ -130,22 +121,16 @@ class AMIL(nn.Module):
     ):
         self._validate_input(x)
 
-        attention_weights = self._compute_attention_weights(
-            x
-        )
+        attention_weights = self._compute_attention_weights(x)
 
         bag_representation = self._aggregate_bag(
             x,
             attention_weights,
         )
 
-        y_prob = self.classifier(
-            bag_representation
-        )
+        y_prob = self.classifier(bag_representation)
 
-        y_hat = (
-            y_prob >= self.threshold
-        ).float()
+        y_hat = (y_prob >= self.threshold).float()
 
         return (
             y_prob,

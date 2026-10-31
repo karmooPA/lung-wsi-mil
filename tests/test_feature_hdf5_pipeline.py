@@ -13,7 +13,7 @@ import h5py
 import numpy as np
 import torch
 
-from src.data.mil_hdf5_dataset import MILHDF5Dataset
+from lung_wsi_mil.data.mil_hdf5_dataset import MILHDF5Dataset
 from src.features.hdf5_pipeline import extract_feature_cache, hash_file
 
 

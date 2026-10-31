@@ -2,7 +2,7 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
-from src.data.mil_dataloader import create_fold_dataloaders
+from lung_wsi_mil.data.mil_dataloader import create_fold_dataloaders
 
 
 class DummyMILDataset(Dataset):

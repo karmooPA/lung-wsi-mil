@@ -1,11 +1,12 @@
+"""Initialization utilities."""
+
 import torch.nn as nn
 
 
 def initialize_weights(model: nn.Module, method: str = "xavier") -> None:
     if method not in ("xavier", "kaiming"):
         raise ValueError(
-            f"Unsupported initialization method: {method}. "
-            "Expected 'xavier' or 'kaiming'."
+            f"Unsupported initialization method: {method}. Expected 'xavier' or 'kaiming'."
         )
 
     for module in model.modules():

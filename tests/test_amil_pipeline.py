@@ -18,9 +18,9 @@ import h5py
 import numpy as np
 import torch
 
-from src.data.mil_dataloader import create_mil_dataloader
-from src.data.mil_hdf5_dataset import MILHDF5Dataset
-from src.mil.amil import AMIL
+from lung_wsi_mil.data.mil_dataloader import create_mil_dataloader
+from lung_wsi_mil.data.mil_hdf5_dataset import MILHDF5Dataset
+from lung_wsi_mil.mil.amil import AMIL
 
 
 PILOT14_REPORT = {}
@@ -96,7 +96,7 @@ def validate_real_pilot_provenance(path):
     from src.features.hdf5_pipeline import (
         _code_identity, hash_file, selected_records, validate_feature_cache,
     )
-    from src.features.kimianet import (
+    from lung_wsi_mil.features.kimianet import (
         OFFICIAL_SOURCE_COMMIT, OFFICIAL_WEIGHTS_SHA256, OFFICIAL_WEIGHTS_URL,
     )
 

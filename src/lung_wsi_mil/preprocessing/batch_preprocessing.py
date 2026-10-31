@@ -1,3 +1,5 @@
+"""Batch preprocessing utilities."""
+
 import argparse
 import csv
 import hashlib
@@ -11,9 +13,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from src.preprocessing.pipeline import preprocess_slide
-from src.preprocessing.qc import save_qc_images
-
+from lung_wsi_mil.preprocessing.pipeline import preprocess_slide
+from lung_wsi_mil.preprocessing.qc import save_qc_images
 
 PREPROCESSING_VERSION = "0.3.0"
 DEFAULT_EXTENSIONS = (".svs", ".tif", ".tiff", ".ndpi", ".mrxs")
@@ -74,9 +75,7 @@ def discover_slides(input_path, extensions=DEFAULT_EXTENSIONS):
 
     if input_path.is_file():
         if input_path.suffix.lower() not in normalized_extensions:
-            raise ValueError(
-                f"Unsupported WSI extension: {input_path.suffix}"
-            )
+            raise ValueError(f"Unsupported WSI extension: {input_path.suffix}")
         return [input_path], input_path.parent
 
     if not input_path.is_dir():
@@ -123,9 +122,7 @@ def slide_output_dir(output_root, input_root, slide_path):
 
 def _lightweight_result(result):
     return {
-        key: value
-        for key, value in result.items()
-        if key not in {"thumbnail", "filtered_mask"}
+        key: value for key, value in result.items() if key not in {"thumbnail", "filtered_mask"}
     }
 
 
@@ -173,10 +170,7 @@ def save_slide_outputs(
     qc_files = None
     if save_qc:
         saved_qc = save_qc_images(result, output_dir / "qc")
-        qc_files = {
-            key: str(Path("qc") / Path(value).name)
-            for key, value in saved_qc.items()
-        }
+        qc_files = {key: str(Path("qc") / Path(value).name) for key, value in saved_qc.items()}
 
     payload = {
         "status": "success",
@@ -275,7 +269,12 @@ def validate_saved_outputs(output_dir, config=None, slide_path=None, expected_pa
             raise ValueError("Each valid patch must be an object.")
         x = patch.get("x")
         y = patch.get("y")
-        if isinstance(x, bool) or isinstance(y, bool) or not isinstance(x, (int, np.integer)) or not isinstance(y, (int, np.integer)):
+        if (
+            isinstance(x, bool)
+            or isinstance(y, bool)
+            or not isinstance(x, (int, np.integer))
+            or not isinstance(y, (int, np.integer))
+        ):
             raise ValueError("Patch coordinates must be integers.")
         if x < 0 or y < 0:
             raise ValueError("Patch coordinates must be non-negative.")
@@ -291,17 +290,19 @@ def validate_saved_outputs(output_dir, config=None, slide_path=None, expected_pa
     if not np.array_equal(coordinates, expected_coordinates):
         raise ValueError("coordinates.npy does not match result.json.")
 
-    with (output_dir / "valid_patches.csv").open(
-        newline="", encoding="utf-8"
-    ) as file:
+    with (output_dir / "valid_patches.csv").open(newline="", encoding="utf-8") as file:
         csv_rows = list(csv.DictReader(file))
     if len(csv_rows) != patch_count:
         raise ValueError("valid_patches.csv row count is invalid.")
     for index, row in enumerate(csv_rows):
-        if int(row["x"]) != int(expected_coordinates[index, 0]) or int(row["y"]) != int(expected_coordinates[index, 1]):
+        if int(row["x"]) != int(expected_coordinates[index, 0]) or int(row["y"]) != int(
+            expected_coordinates[index, 1]
+        ):
             raise ValueError("valid_patches.csv coordinates do not match result.json.")
         tissue = float(row["tissue_percentage"])
-        if not math.isfinite(tissue) or not math.isclose(tissue, expected_tissue[index], rel_tol=0, abs_tol=1e-6):
+        if not math.isfinite(tissue) or not math.isclose(
+            tissue, expected_tissue[index], rel_tol=0, abs_tol=1e-6
+        ):
             raise ValueError("valid_patches.csv tissue values do not match result.json.")
 
     if stored_config.get("save_qc"):
@@ -359,15 +360,9 @@ def manifest_row(payload):
             {
                 "candidate_tile_count": result.get("candidate_tile_count", ""),
                 "valid_patch_count": result.get("valid_patch_count", ""),
-                "feature_extraction_ready": result.get(
-                    "feature_extraction_ready", ""
-                ),
-                "source_magnification": resolution.get(
-                    "source_magnification", ""
-                ),
-                "target_magnification": resolution.get(
-                    "target_magnification", ""
-                ),
+                "feature_extraction_ready": result.get("feature_extraction_ready", ""),
+                "source_magnification": resolution.get("source_magnification", ""),
+                "target_magnification": resolution.get("target_magnification", ""),
                 "target_mpp_x": resolution.get("target_mpp_x", ""),
                 "target_mpp_y": resolution.get("target_mpp_y", ""),
             }
@@ -518,10 +513,7 @@ def _run_batch_unlocked(
             failed_count += 1
             rows.append(manifest_row(payload))
 
-            print(
-                f"FAILED: {type(error).__name__}: {error}\n"
-                "Continuing with the next WSI."
-            )
+            print(f"FAILED: {type(error).__name__}: {error}\nContinuing with the next WSI.")
 
         write_manifest(rows, output_root)
 

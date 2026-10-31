@@ -48,15 +48,15 @@ from src.augmentation.storage import (
     uint8_views_to_normalized,
     validate_augmented_hdf5,
 )
-from src.preprocessing.batch_preprocessing import (
+from lung_wsi_mil.preprocessing.batch_preprocessing import (
     build_config,
     config_fingerprint,
     save_slide_outputs,
     validate_saved_outputs,
 )
-from src.preprocessing.patch_extraction import extract_patch
-from src.preprocessing.pipeline import preprocess_slide
-from src.preprocessing.wsi_reader import open_slide
+from lung_wsi_mil.preprocessing.patch_extraction import extract_patch
+from lung_wsi_mil.preprocessing.pipeline import preprocess_slide
+from lung_wsi_mil.preprocessing.wsi_reader import open_slide
 
 SUPPORTED_EXTENSIONS = {".svs", ".tif", ".tiff", ".ndpi", ".mrxs"}
 PILOT_VERSION = "2.0.0"
@@ -68,14 +68,14 @@ CODE_INPUTS = (
     "scripts/run_14_wsi_pilot.py",
     "src/augmentation/data_augmentations.py",
     "src/augmentation/storage.py",
-    "src/preprocessing/pipeline.py",
-    "src/preprocessing/wsi_reader.py",
-    "src/preprocessing/thumbnail.py",
-    "src/preprocessing/tissue_detection.py",
-    "src/preprocessing/patch_coordinates.py",
-    "src/preprocessing/patch_extraction.py",
-    "src/preprocessing/batch_preprocessing.py",
-    "src/preprocessing/qc.py",
+    "src/lung_wsi_mil/preprocessing/pipeline.py",
+    "src/lung_wsi_mil/preprocessing/wsi_reader.py",
+    "src/lung_wsi_mil/preprocessing/thumbnail.py",
+    "src/lung_wsi_mil/preprocessing/tissue_detection.py",
+    "src/lung_wsi_mil/preprocessing/patch_coordinates.py",
+    "src/lung_wsi_mil/preprocessing/patch_extraction.py",
+    "src/lung_wsi_mil/preprocessing/batch_preprocessing.py",
+    "src/lung_wsi_mil/preprocessing/qc.py",
 )
 
 

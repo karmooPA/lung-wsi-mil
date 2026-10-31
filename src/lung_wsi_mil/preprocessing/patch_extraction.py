@@ -1,5 +1,7 @@
-from PIL import Image
+"""Patch extraction utilities."""
+
 import numpy as np
+from PIL import Image
 from skimage.morphology import dilation
 
 
@@ -22,9 +24,7 @@ def calculate_average_background_color(
     if background_pixels.size == 0:
         return (255, 255, 255)
 
-    average_color = np.rint(
-        background_pixels.mean(axis=0)
-    ).astype(np.uint8)
+    average_color = np.rint(background_pixels.mean(axis=0)).astype(np.uint8)
 
     return tuple(int(value) for value in average_color)
 
@@ -46,13 +46,7 @@ def get_level_read_size(
     level_downsample,
 ):
     """Pixels to read at a chosen pyramid level before exact-scale resizing."""
-    read_size = int(
-        round(
-            patch_size
-            * target_downsample
-            / level_downsample
-        )
-    )
+    read_size = int(round(patch_size * target_downsample / level_downsample))
 
     return max(read_size, 1)
 

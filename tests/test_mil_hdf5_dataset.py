@@ -8,7 +8,7 @@ import h5py
 import numpy as np
 import torch
 
-from src.data.mil_hdf5_dataset import MILHDF5Dataset
+from lung_wsi_mil.data.mil_hdf5_dataset import MILHDF5Dataset
 
 
 class MILHDF5DatasetTests(unittest.TestCase):

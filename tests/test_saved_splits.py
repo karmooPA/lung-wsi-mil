@@ -2,11 +2,11 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.data.splits import (
+from lung_wsi_mil.data.splits import (
     REFERENCE_SEEDS,
     validate_patient_split,
 )
-from src.data.cross_validation import (
+from lung_wsi_mil.data.cross_validation import (
     N_FOLDS,
     validate_fold_split,
 )

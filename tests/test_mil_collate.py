@@ -1,6 +1,6 @@
 import torch
 
-from src.data.mil_collate import mil_collate_fn
+from lung_wsi_mil.data.mil_collate import mil_collate_fn
 
 
 def test_mil_collate_fn():

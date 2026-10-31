@@ -12,8 +12,8 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from src.mil.amil import AMIL
-from src.mil.initialization import initialize_weights
+from lung_wsi_mil.mil.amil import AMIL
+from lung_wsi_mil.mil.initialization import initialize_weights
 
 
 class AMILContractTests(unittest.TestCase):

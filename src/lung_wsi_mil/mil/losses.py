@@ -1,3 +1,4 @@
+"""Validated binary cross-entropy for the AMIL probability contract."""
 
 from __future__ import annotations
 
@@ -22,10 +23,7 @@ def _normalize_binary_tensor(
     elif value.ndim == 2 and value.shape[1] == 1:
         value = value.squeeze(1)
     elif value.ndim != 1:
-        raise ValueError(
-            f"{name} must be scalar, [B], or [B, 1]; "
-            f"got shape {tuple(value.shape)}."
-        )
+        raise ValueError(f"{name} must be scalar, [B], or [B, 1]; got shape {tuple(value.shape)}.")
 
     if value.numel() == 0:
         raise ValueError(f"{name} must not be empty.")
@@ -42,9 +40,7 @@ def binary_cross_entropy_loss(
         raise TypeError("y_prob must be a torch.Tensor.")
 
     if not y_prob.is_floating_point():
-        raise TypeError(
-            "y_prob must have a floating-point dtype."
-        )
+        raise TypeError("y_prob must have a floating-point dtype.")
 
     if isinstance(eps, bool) or not isinstance(eps, (int, float)):
         raise TypeError("eps must be a real number.")
@@ -63,9 +59,7 @@ def binary_cross_entropy_loss(
     )
 
     if probabilities.device != labels.device:
-        raise ValueError(
-            "y_prob and targets must be on the same device."
-        )
+        raise ValueError("y_prob and targets must be on the same device.")
 
     if probabilities.shape != labels.shape:
         raise ValueError(
@@ -77,24 +71,16 @@ def binary_cross_entropy_loss(
     if not torch.isfinite(probabilities).all().item():
         raise ValueError("y_prob contains NaN or Inf.")
 
-    if torch.any(
-        (probabilities < 0.0) | (probabilities > 1.0)
-    ).item():
-        raise ValueError(
-            "y_prob must contain probabilities between 0 and 1."
-        )
+    if torch.any((probabilities < 0.0) | (probabilities > 1.0)).item():
+        raise ValueError("y_prob must contain probabilities between 0 and 1.")
 
     labels = labels.to(dtype=probabilities.dtype)
 
     if not torch.isfinite(labels).all().item():
         raise ValueError("targets contains NaN or Inf.")
 
-    if not torch.all(
-        (labels == 0.0) | (labels == 1.0)
-    ).item():
-        raise ValueError(
-            "targets must contain only binary labels 0 and 1."
-        )
+    if not torch.all((labels == 0.0) | (labels == 1.0)).item():
+        raise ValueError("targets must contain only binary labels 0 and 1.")
 
     probabilities = probabilities.clamp(
         min=eps,

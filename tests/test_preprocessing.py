@@ -8,7 +8,7 @@ import numpy as np
 import openslide
 from PIL import Image
 
-from src.preprocessing.batch_preprocessing import (
+from lung_wsi_mil.preprocessing.batch_preprocessing import (
     _acquire_output_lock,
     build_config,
     load_completed_result,
@@ -16,17 +16,17 @@ from src.preprocessing.batch_preprocessing import (
     save_slide_outputs,
     slide_output_dir,
 )
-from src.preprocessing.patch_coordinates import (
+from lung_wsi_mil.preprocessing.patch_coordinates import (
     get_patch_coordinates,
     tile_indices_to_level0_coordinates,
 )
-from src.preprocessing.patch_extraction import (
+from lung_wsi_mil.preprocessing.patch_extraction import (
     calculate_patch_tissue_percentage,
     extract_patch,
     is_valid_patch,
 )
-from src.preprocessing.pipeline import preprocess_slide
-from src.preprocessing.wsi_reader import (
+from lung_wsi_mil.preprocessing.pipeline import preprocess_slide
+from lung_wsi_mil.preprocessing.wsi_reader import (
     estimate_objective_power_from_mpp,
     resolve_target_resolution,
 )
@@ -100,7 +100,7 @@ class ResolutionTests(unittest.TestCase):
 class PipelineTests(unittest.TestCase):
     def test_end_to_end_synthetic_slide_closes_and_returns_valid_coordinates(self):
         slide = SyntheticSlide()
-        with mock.patch("src.preprocessing.pipeline.open_slide", return_value=slide):
+        with mock.patch("lung_wsi_mil.preprocessing.pipeline.open_slide", return_value=slide):
             result = preprocess_slide("synthetic.svs", thumbnail_max_size=512)
         self.assertTrue(slide.closed)
         self.assertEqual(result["status"], "success")
@@ -110,7 +110,7 @@ class PipelineTests(unittest.TestCase):
 
     def test_color_filter_empty_has_explicit_reason(self):
         slide = SyntheticSlide()
-        with mock.patch("src.preprocessing.pipeline.open_slide", return_value=slide):
+        with mock.patch("lung_wsi_mil.preprocessing.pipeline.open_slide", return_value=slide):
             result = preprocess_slide("synthetic.svs", color_distance_threshold=0)
         self.assertEqual(result["reason"], "no_tissue_after_color_filter")
         self.assertEqual(result["valid_patch_count"], 0)
@@ -131,8 +131,8 @@ class PipelineTests(unittest.TestCase):
 
     def test_slide_is_closed_when_processing_raises(self):
         slide = SyntheticSlide()
-        with mock.patch("src.preprocessing.pipeline.open_slide", return_value=slide), mock.patch(
-            "src.preprocessing.pipeline.create_thumbnail", side_effect=RuntimeError("boom")
+        with mock.patch("lung_wsi_mil.preprocessing.pipeline.open_slide", return_value=slide), mock.patch(
+            "lung_wsi_mil.preprocessing.pipeline.create_thumbnail", side_effect=RuntimeError("boom")
         ):
             with self.assertRaisesRegex(RuntimeError, "boom"):
                 preprocess_slide("synthetic.svs")

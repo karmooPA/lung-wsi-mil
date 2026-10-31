@@ -1,3 +1,5 @@
+"""Hdf5 writer utilities."""
+
 from pathlib import Path
 
 import h5py
@@ -32,29 +34,19 @@ def save_slide_to_hdf5(
     )
 
     if embeddings.ndim != 3:
-        raise ValueError(
-            "Embeddings must have shape [3, N, 1024]."
-        )
+        raise ValueError("Embeddings must have shape [3, N, 1024].")
 
     if embeddings.shape[0] != 3:
-        raise ValueError(
-            "Expected 3 embedding versions: Original, Aug1, Aug2."
-        )
+        raise ValueError("Expected 3 embedding versions: Original, Aug1, Aug2.")
 
     if embeddings.shape[2] != 1024:
-        raise ValueError(
-            "Expected KimiaNet embedding dimension of 1024."
-        )
+        raise ValueError("Expected KimiaNet embedding dimension of 1024.")
 
     if coordinates.ndim != 2 or coordinates.shape[1] != 2:
-        raise ValueError(
-            "Coordinates must have shape [N, 2]."
-        )
+        raise ValueError("Coordinates must have shape [N, 2].")
 
     if embeddings.shape[1] != coordinates.shape[0]:
-        raise ValueError(
-            "Number of embeddings and coordinates must match."
-        )
+        raise ValueError("Number of embeddings and coordinates must match.")
 
     hdf5_path.parent.mkdir(
         parents=True,

@@ -4,7 +4,7 @@ import torch
 from torch import nn
 from torch.optim import SGD
 
-from src.mil.training import train_batch, train_one_epoch
+from lung_wsi_mil.mil.training import train_batch, train_one_epoch
 
 
 class TinyAMIL(nn.Module):

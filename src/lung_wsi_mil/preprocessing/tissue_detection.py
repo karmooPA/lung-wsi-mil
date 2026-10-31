@@ -1,3 +1,5 @@
+"""Tissue detection utilities."""
+
 import numpy as np
 from skimage.color import rgb2gray
 from skimage.filters import threshold_otsu

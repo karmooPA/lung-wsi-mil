@@ -16,13 +16,13 @@ import torch
 
 from src.augmentation import transform_batch, transform_patch
 
-HAVE_FEATURES = importlib.util.find_spec('src.features.feature_extraction') is not None
+HAVE_FEATURES = importlib.util.find_spec('lung_wsi_mil.features.feature_extraction') is not None
 if HAVE_FEATURES:
     import h5py
-    from src.features.transforms import kimianet_transform
-    from src.features.feature_extraction import extract_embeddings_with_coordinates
-    from src.features.kimianet import KimiaNetFeatureExtractor
-    from src.features.pipeline import process_transformed_slide
+    from lung_wsi_mil.features.transforms import kimianet_transform
+    from lung_wsi_mil.features.feature_extraction import extract_embeddings_with_coordinates
+    from lung_wsi_mil.features.kimianet import KimiaNetFeatureExtractor
+    from lung_wsi_mil.features.pipeline import process_transformed_slide
 
 
 class MeanEncoder(torch.nn.Module):

@@ -19,7 +19,7 @@ import numpy as np
 import torch
 
 from src.augmentation.storage import load_augmented_chunk, validate_augmented_hdf5
-from src.features.kimianet import (
+from lung_wsi_mil.features.kimianet import (
     KimiaNetFeatureExtractor,
     OFFICIAL_SOURCE_COMMIT,
     OFFICIAL_WEIGHTS_SHA256,
@@ -89,7 +89,7 @@ def selected_records(inventory, selection=None):
 
 
 def _code_identity():
-    paths = ("src/features/hdf5_pipeline.py", "src/features/kimianet.py",
+    paths = ("src/features/hdf5_pipeline.py", "src/lung_wsi_mil/features/kimianet.py",
              "src/augmentation/storage.py", "src/augmentation/data_augmentations.py")
     return {name: hash_file(PROJECT_ROOT / name) for name in paths}
 

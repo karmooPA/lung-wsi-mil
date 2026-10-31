@@ -1,5 +1,6 @@
-from sklearn.model_selection import StratifiedGroupKFold
+"""Splits utilities."""
 
+from sklearn.model_selection import StratifiedGroupKFold
 
 REFERENCE_SEEDS = [2, 3, 5, 7, 11]
 
@@ -60,9 +61,7 @@ def create_patient_aware_split(
     missing_columns = required_columns.difference(metadata.columns)
 
     if missing_columns:
-        raise ValueError(
-            f"Missing required columns: {sorted(missing_columns)}"
-        )
+        raise ValueError(f"Missing required columns: {sorted(missing_columns)}")
 
     splitter = StratifiedGroupKFold(
         n_splits=5,

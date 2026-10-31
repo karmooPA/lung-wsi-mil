@@ -1,3 +1,6 @@
+"""Thumbnail utilities."""
+
+
 def create_thumbnail(slide, max_size=1024):
     """Create an RGB thumbnail and Level-0-to-thumbnail scale factors."""
     if max_size <= 0:

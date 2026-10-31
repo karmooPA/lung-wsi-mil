@@ -102,8 +102,8 @@ def _code_identity():
                     "error": str(error)}
     # Dirty working trees still have an auditable identity for the exact files
     # under test; generated report files do not enter this fingerprint.
-    paths = sorted({*PROJECT_ROOT.glob("src/mil/*.py"),
-                    *PROJECT_ROOT.glob("src/data/*.py"),
+    paths = sorted({*PROJECT_ROOT.glob("src/lung_wsi_mil/mil/*.py"),
+                    *PROJECT_ROOT.glob("src/lung_wsi_mil/data/*.py"),
                     *PROJECT_ROOT.glob("tests/test_amil*.py"),
                     Path(__file__).resolve()})
     identity["tested_file_sha256"] = {

@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import Dataset
 
-from src.data.mil_dataloader import create_mil_dataloader
+from lung_wsi_mil.data.mil_dataloader import create_mil_dataloader
 
 
 class DummyMILDataset(Dataset):
