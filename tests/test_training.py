@@ -1,9 +1,16 @@
+from types import SimpleNamespace
+
+import h5py
+import numpy as np
 import pytest
 import torch
 from torch import nn
 from torch.optim import SGD
 
-from lung_wsi_mil.mil.training import train_batch, train_one_epoch
+from lung_wsi_mil.data.mil_dataloader import create_mil_dataloader
+from lung_wsi_mil.data.mil_hdf5_dataset import MILHDF5Dataset
+from lung_wsi_mil.mil.amil import AMIL
+from lung_wsi_mil.mil.training import _resolve_device, train_batch, train_one_epoch
 
 
 class TinyAMIL(nn.Module):
@@ -312,6 +319,7 @@ def test_train_one_epoch_returns_expected_metrics():
     first_batch = make_batch(
         bags=[torch.tensor([[1.0, 2.0]])],
         labels=[1],
+        slide_ids=("first-slide",),
     )
     second_batch = make_batch(
         bags=[
@@ -319,6 +327,7 @@ def test_train_one_epoch_returns_expected_metrics():
             torch.tensor([[2.0, 1.0]]),
         ],
         labels=[0, 1],
+        slide_ids=("second-slide", "third-slide"),
     )
 
     result = train_one_epoch(
@@ -359,3 +368,59 @@ def test_train_one_epoch_rejects_invalid_optimizer():
 
     with pytest.raises(TypeError, match="torch.optim.Optimizer"):
         train_one_epoch(model, [], object())
+
+
+def test_train_one_epoch_counts_slide_views_once_across_batches():
+    model, optimizer = make_model_and_optimizer()
+    batches = [
+        make_batch(
+            [torch.tensor([[1.0, 2.0]])],
+            [1],
+            slide_ids=("shared-slide",),
+            augmented=[augmented],
+        )
+        for augmented in (False, True, True)
+    ]
+
+    metrics = train_one_epoch(model, batches, optimizer)
+
+    assert metrics["num_batches"] == 3
+    assert metrics["num_bags"] == 3
+    assert metrics["num_slides"] == 1
+
+
+def test_requested_device_without_an_index_uses_the_models_device():
+    class DeviceOnlyModel(nn.Module):
+        def parameters(self):
+            # No accelerator allocation: exercise device resolution independently.
+            return iter([SimpleNamespace(device=torch.device("cuda:2"))])
+
+    model = DeviceOnlyModel()
+    assert _resolve_device(model, "cuda") == torch.device("cuda:2")
+    with pytest.raises(ValueError, match="requested device"):
+        _resolve_device(model, "cuda:1")
+
+
+def test_real_amil_optimizes_variable_length_hdf5_bags(tmp_path):
+    path = tmp_path / "features.h5"
+    rng = np.random.default_rng(7)
+    with h5py.File(path, "w") as file:
+        for index, patch_count in enumerate((2, 3)):
+            group = file.create_group(f"slide-{index}")
+            group.create_dataset("embeddings", data=rng.normal(size=(3, patch_count, 1024)))
+            group.create_dataset("coords", data=np.zeros((patch_count, 2), dtype=np.int64))
+            group.create_dataset("label", data=index)
+            group.create_dataset("case_id", data=f"patient-{index}".encode())
+
+    torch.manual_seed(7)
+    model = AMIL()
+    before = model.classifier[0].weight.detach().clone()
+    loader = create_mil_dataloader(MILHDF5Dataset(path), batch_size=2)
+
+    metrics = train_one_epoch(model, loader, SGD(model.parameters(), lr=0.1))
+
+    assert metrics["num_bags"] == 6
+    assert metrics["num_slides"] == 2
+    assert metrics["num_batches"] == 1
+    assert np.isfinite(metrics["loss"])
+    assert not torch.equal(before, model.classifier[0].weight)

@@ -33,6 +33,10 @@ def _resolve_device(
     model_device = next(iter(model_devices))
     target_device = model_device if device is None else torch.device(device)
 
+    # "cuda" means the model's current CUDA index, not a different device.
+    if target_device.type == model_device.type and target_device.index is None:
+        target_device = model_device
+
     if target_device != model_device:
         raise ValueError("Move the model to the requested device before training.")
 
@@ -158,6 +162,7 @@ def train_batch(
     device: str | torch.device | None = None,
     eps: float = 1e-5,
 ) -> dict[str, float | int]:
+    """Optimize one padded batch and report the mean loss over its view-bags."""
     if not isinstance(optimizer, Optimizer):
         raise TypeError("optimizer must be an instance of torch.optim.Optimizer.")
 
@@ -230,6 +235,7 @@ def train_one_epoch(
     device: str | torch.device | None = None,
     eps: float = 1e-5,
 ) -> dict[str, float | int]:
+    """Train all batches, weighting loss by bag count and counting unique slides."""
     if not isinstance(optimizer, Optimizer):
         raise TypeError("optimizer must be an instance of torch.optim.Optimizer.")
 
@@ -242,7 +248,7 @@ def train_one_epoch(
     total_loss = 0.0
     total_bags = 0
     total_batches = 0
-    total_slides = 0
+    seen_slides: set[str] = set()
 
     for batch in dataloader:
         batch_result = train_batch(
@@ -259,7 +265,7 @@ def train_one_epoch(
         total_loss += batch_loss * batch_bags
         total_bags += batch_bags
         total_batches += 1
-        total_slides += int(batch_result["num_slides"])
+        seen_slides.update(batch[3])
 
     if total_batches == 0 or total_bags == 0:
         raise ValueError("The training dataloader produced no bags.")
@@ -268,5 +274,5 @@ def train_one_epoch(
         "loss": total_loss / total_bags,
         "num_batches": total_batches,
         "num_bags": total_bags,
-        "num_slides": total_slides,
+        "num_slides": len(seen_slides),
     }
