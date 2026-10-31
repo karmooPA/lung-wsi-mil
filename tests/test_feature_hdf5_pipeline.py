@@ -1,12 +1,12 @@
 """Cheap encoders test streaming/alignment; these do not validate KimiaNet weights."""
 
-from contextlib import redirect_stdout
 import csv
 import io
 import json
-from pathlib import Path
 import tempfile
 import unittest
+from contextlib import redirect_stdout
+from pathlib import Path
 from unittest.mock import patch
 
 import h5py
@@ -14,7 +14,7 @@ import numpy as np
 import torch
 
 from lung_wsi_mil.data.mil_hdf5_dataset import MILHDF5Dataset
-from src.features.hdf5_pipeline import extract_feature_cache, hash_file
+from lung_wsi_mil.features.hdf5_pipeline import extract_feature_cache, hash_file
 
 
 class ChannelEncoder(torch.nn.Module):
@@ -55,8 +55,10 @@ class FeatureHDF5PipelineTests(unittest.TestCase):
         self.weights = self.root / "mock-unit-test-weights.bin"
         self.weights.write_bytes(b"not-a-real-model-unit-tests-patch-loader")
         self.output = self.root / "features.h5"
-        self.rows = [{"slide_id": f"slide_{i}", "patient_id": f"case_{i}",
-                      "label": label} for i, label in enumerate(("Normal", "Tumor"))]
+        self.rows = [
+            {"slide_id": f"slide_{i}", "patient_id": f"case_{i}", "label": label}
+            for i, label in enumerate(("Normal", "Tumor"))
+        ]
         self._csv(self.inventory, self.rows)
         self._csv(self.selection, self.rows[::-1])
         self.images = {}
@@ -65,8 +67,11 @@ class FeatureHDF5PipelineTests(unittest.TestCase):
             pixels = np.empty((3, n, 512, 512, 3), dtype=np.uint8)
             for view in range(3):
                 for row in range(n):
-                    pixels[view, row] = [20 + index * 7 + view * 30 + row,
-                                         80 + view * 20 + row, 180 - view * 10 - row]
+                    pixels[view, row] = [
+                        20 + index * 7 + view * 30 + row,
+                        80 + view * 20 + row,
+                        180 - view * 10 - row,
+                    ]
             self._source(index, pixels)
 
     @staticmethod
@@ -83,27 +88,46 @@ class FeatureHDF5PipelineTests(unittest.TestCase):
         path.parent.mkdir(parents=True, exist_ok=True)
         with h5py.File(path, "w") as file:
             file.create_dataset("images", data=pixels)
-            file.create_dataset("coords", data=np.column_stack((np.arange(n) * 512,
-                                                                  np.arange(n) * 256)).astype(np.int64))
+            file.create_dataset(
+                "coords",
+                data=np.column_stack((np.arange(n) * 512, np.arange(n) * 256)).astype(np.int64),
+            )
             file.create_dataset("tissue_percentage", data=np.full(n, 55, dtype=np.float32))
             file.attrs.update(
-                format_version="2.0", slide_id=row["slide_id"], patient_id=row["patient_id"],
-                label=row["label"], representations=json.dumps(["Original", "Aug1", "Aug2"]),
-                image_layout="representation,patch,height,width,channel", stored_dtype="uint8",
+                format_version="2.0",
+                slide_id=row["slide_id"],
+                patient_id=row["patient_id"],
+                label=row["label"],
+                representations=json.dumps(["Original", "Aug1", "Aug2"]),
+                image_layout="representation,patch,height,width,channel",
+                stored_dtype="uint8",
                 restored_tensor_layout="representation,patch,channel,height,width",
-                restored_tensor_dtype="float32", imagenet_mean=json.dumps([0.485, 0.456, 0.406]),
-                imagenet_std=json.dumps([0.229, 0.224, 0.225]), patch_size=512,
-                patch_count=n, run_fingerprint="fixture-pipeline-v1")
+                restored_tensor_dtype="float32",
+                imagenet_mean=json.dumps([0.485, 0.456, 0.406]),
+                imagenet_std=json.dumps([0.229, 0.224, 0.225]),
+                patch_size=512,
+                patch_count=n,
+                run_fingerprint="fixture-pipeline-v1",
+            )
         self.images[row["slide_id"]] = pixels
         self.paths[row["slide_id"]] = path
 
     def _run(self, model=None, **kwargs):
         model = ChannelEncoder() if model is None else model
-        arguments = dict(patch_root=self.root, inventory=self.inventory,
-                         selection=self.selection, weights=self.weights,
-                         output=self.output, batch_size=2, device="cpu")
+        arguments = dict(
+            patch_root=self.root,
+            inventory=self.inventory,
+            selection=self.selection,
+            weights=self.weights,
+            output=self.output,
+            batch_size=2,
+            device="cpu",
+        )
         arguments.update(kwargs)
-        with patch("src.features.hdf5_pipeline._load_encoder", return_value=model), redirect_stdout(io.StringIO()):
+        with (
+            patch("lung_wsi_mil.features.hdf5_pipeline._load_encoder", return_value=model),
+            redirect_stdout(io.StringIO()),
+        ):
             return extract_feature_cache(**arguments)
 
     def test_streams_all_views_preserves_alignment_and_normalization(self):
@@ -112,12 +136,16 @@ class FeatureHDF5PipelineTests(unittest.TestCase):
         self.assertEqual((report["slides"], report["patches"], report["patch_views"]), (2, 4, 12))
         self.assertEqual(report["status"], "created")
         self.assertEqual(len(encoder.calls), 9)
-        self.assertTrue(all(shape[0] <= 2 and shape[1:] == (3, 512, 512) for shape in encoder.calls))
+        self.assertTrue(
+            all(shape[0] <= 2 and shape[1:] == (3, 512, 512) for shape in encoder.calls)
+        )
         dataset = MILHDF5Dataset(self.output)
         for index in range(len(dataset)):
             embeddings, coords, label, slide_id, case_id = dataset[index]
             pixels = self.images[slide_id][:, :, 0, 0].astype(np.float32)
-            expected = (pixels / np.float32(255) - np.array([0.485, 0.456, 0.406], np.float32)) / np.array([0.229, 0.224, 0.225], np.float32)
+            expected = (
+                pixels / np.float32(255) - np.array([0.485, 0.456, 0.406], np.float32)
+            ) / np.array([0.229, 0.224, 0.225], np.float32)
             np.testing.assert_array_equal(embeddings[:, :, :3].numpy(), expected)
             np.testing.assert_array_equal(embeddings[:, :, 3].numpy(), expected[:, :, 0])
             self.assertEqual(case_id, "case_" + slide_id[-1])
@@ -134,10 +162,23 @@ class FeatureHDF5PipelineTests(unittest.TestCase):
     def test_resume_identical_complete_cache_does_not_call_encoder(self):
         self._run()
         before = hash_file(self.output)
-        with patch("src.features.hdf5_pipeline._load_encoder", side_effect=AssertionError("should not load")), redirect_stdout(io.StringIO()):
-            report = extract_feature_cache(patch_root=self.root, inventory=self.inventory,
-                                           selection=self.selection, weights=self.weights,
-                                           output=self.output, batch_size=2, device="cpu", resume=True)
+        with (
+            patch(
+                "lung_wsi_mil.features.hdf5_pipeline._load_encoder",
+                side_effect=AssertionError("should not load"),
+            ),
+            redirect_stdout(io.StringIO()),
+        ):
+            report = extract_feature_cache(
+                patch_root=self.root,
+                inventory=self.inventory,
+                selection=self.selection,
+                weights=self.weights,
+                output=self.output,
+                batch_size=2,
+                device="cpu",
+                resume=True,
+            )
         self.assertEqual(report["status"], "resumed")
         self.assertEqual(hash_file(self.output), before)
         with self.assertRaises(FileExistsError):

@@ -6,9 +6,9 @@ No global NumPy/Python/PyTorch seed is modified.
 """
 
 import numpy as np
+import torch
 from PIL import Image, ImageFilter
 from skimage.color import hed2rgb, rgb2hed
-import torch
 from torchvision import transforms
 
 PATCH_SIZE = 512
@@ -59,8 +59,11 @@ class RotateRandom:
         turn = int(self.rng.integers(0, 4))
         if turn == 0:
             return image.copy()
-        operation = (Image.Transpose.ROTATE_90, Image.Transpose.ROTATE_180,
-                     Image.Transpose.ROTATE_270)[turn - 1]
+        operation = (
+            Image.Transpose.ROTATE_90,
+            Image.Transpose.ROTATE_180,
+            Image.Transpose.ROTATE_270,
+        )[turn - 1]
         return image.transpose(operation)
 
 
@@ -84,23 +87,30 @@ class RandomVerticalFlip:
         return image.copy()
 
 
-normal_transforms = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
-])
+normal_transforms = transforms.Compose(
+    [
+        transforms.ToTensor(),
+        transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
+    ]
+)
 
 
 def make_aug_transforms(rng=None):
     """Two pipelines using distinct draws from one advancing random stream."""
     rng = np.random.default_rng() if rng is None else rng
-    return [transforms.Compose([
-        RandomHEStain(rng),
-        RandomGaussianNoise(rng),
-        RotateRandom(rng),
-        RandomHorizontalFlip(rng),
-        RandomVerticalFlip(rng),
-        normal_transforms,
-    ]) for _ in range(2)]
+    return [
+        transforms.Compose(
+            [
+                RandomHEStain(rng),
+                RandomGaussianNoise(rng),
+                RotateRandom(rng),
+                RandomHorizontalFlip(rng),
+                RandomVerticalFlip(rng),
+                normal_transforms,
+            ]
+        )
+        for _ in range(2)
+    ]
 
 
 aug_transforms = make_aug_transforms()
@@ -114,8 +124,10 @@ def _validate_patch(patch):
 
 
 def _views(patch, augmentations):
-    return tuple(transform(patch).to(dtype=torch.float32)
-                 for transform in (normal_transforms, *augmentations))
+    return tuple(
+        transform(patch).to(dtype=torch.float32)
+        for transform in (normal_transforms, *augmentations)
+    )
 
 
 def transform_patch(patch, *, rng=None):

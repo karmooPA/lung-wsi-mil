@@ -6,9 +6,8 @@ import json
 import os
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-
 
 PROJECT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT_ROOT = PROJECT.parent / f"{PROJECT.name}-outputs"
@@ -16,9 +15,9 @@ DEFAULT_OUTPUT_ROOT = PROJECT.parent / f"{PROJECT.name}-outputs"
 
 def _run(name, command, env):
     print(f"\n=== {name} ===", flush=True)
-    started = datetime.now(timezone.utc)
+    started = datetime.now(UTC)
     completed = subprocess.run(command, cwd=PROJECT, env=env, check=False)
-    elapsed = (datetime.now(timezone.utc) - started).total_seconds()
+    elapsed = (datetime.now(UTC) - started).total_seconds()
     return {
         "name": name,
         "command": command,
@@ -51,7 +50,9 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
 
     env = dict(os.environ)
-    env["PYTHONPATH"] = str(PROJECT)
+    env["PYTHONPATH"] = os.pathsep.join(
+        filter(None, (str(PROJECT / "src"), str(PROJECT), env.get("PYTHONPATH")))
+    )
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     python = sys.executable
     commands = [
@@ -59,11 +60,23 @@ def main():
         ("Unit and integration tests", [python, "-m", "pytest", "-q", "tests"]),
         (
             "Frozen source validation",
-            [python, "scripts/validate_sources.py", "--output", str(output_dir / "source_validation.json")],
+            [
+                python,
+                "scripts/validate_sources.py",
+                "--output",
+                str(output_dir / "source_validation.json"),
+            ],
         ),
         (
             "Recorded audit replay",
-            [python, "scripts/inspect_dataset.py", "--mode", "recorded", "--output-dir", str(output_dir / "audit-recorded")],
+            [
+                python,
+                "scripts/inspect_dataset.py",
+                "--mode",
+                "recorded",
+                "--output-dir",
+                str(output_dir / "audit-recorded"),
+            ],
         ),
         ("Installed dependency consistency", [python, "-m", "pip", "check"]),
         ("Committed-tree whitespace check", ["git", "show", "--check", "--format=", "HEAD"]),
@@ -84,7 +97,7 @@ def main():
     results = [_run(name, command, env) for name, command in commands]
     report = {
         "status": "PASSED" if all(item["exit_code"] == 0 for item in results) else "FAILED",
-        "completed_at_utc": datetime.now(timezone.utc).isoformat(),
+        "completed_at_utc": datetime.now(UTC).isoformat(),
         "python": sys.version,
         "project": str(PROJECT),
         "checks": results,

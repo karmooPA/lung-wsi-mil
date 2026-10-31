@@ -1,10 +1,10 @@
 """Checkpoint routing/safety checks; no trained weights are redistributed."""
 
-from collections import OrderedDict
 import hashlib
-from pathlib import Path
 import tempfile
 import unittest
+from collections import OrderedDict
+from pathlib import Path
 from unittest.mock import patch
 
 import torch
@@ -15,6 +15,7 @@ from lung_wsi_mil.features.kimianet import load_kimianet_weights
 
 class TinyEncoder(nn.Module):
     """Uses the same parameter namespaces, without duplicating a large model."""
+
     def __init__(self):
         super().__init__()
         self.features = nn.Sequential(nn.Linear(3, 4), nn.BatchNorm1d(4))
@@ -30,8 +31,7 @@ class KimiaNetWeightsTests(unittest.TestCase):
             torch.manual_seed(5)
             self.model = TinyEncoder().train()
         self.expected = OrderedDict(
-            (name, torch.full_like(value, 2))
-            for name, value in self.model.state_dict().items()
+            (name, torch.full_like(value, 2)) for name, value in self.model.state_dict().items()
         )
 
     @staticmethod
@@ -39,15 +39,18 @@ class KimiaNetWeightsTests(unittest.TestCase):
         renamed = OrderedDict()
         for name, value in state.items():
             if name.startswith("features."):
-                name = "model." + name[len("features."):]
+                name = "model." + name[len("features.") :]
             elif name.startswith("classifier."):
-                name = "fc_4." + name[len("classifier."):]
+                name = "fc_4." + name[len("classifier.") :]
             renamed[("module." if data_parallel else "") + name] = value
         return renamed
 
     def test_official_and_native_key_names_load_exactly_and_freeze_model(self):
-        for checkpoint in (self.expected, self.official_names(self.expected),
-                           self.official_names(self.expected, data_parallel=False)):
+        for checkpoint in (
+            self.expected,
+            self.official_names(self.expected),
+            self.official_names(self.expected, data_parallel=False),
+        ):
             with self.subTest(first_key=next(iter(checkpoint))):
                 self.model.train().requires_grad_(True)
                 torch.save(checkpoint, self.path)
@@ -55,7 +58,9 @@ class KimiaNetWeightsTests(unittest.TestCase):
                 self.assertIs(loaded, self.model)
                 self.assertFalse(loaded.training)
                 self.assertTrue(all(not module.training for module in loaded.modules()))
-                self.assertTrue(all(not parameter.requires_grad for parameter in loaded.parameters()))
+                self.assertTrue(
+                    all(not parameter.requires_grad for parameter in loaded.parameters())
+                )
                 for name, actual in loaded.state_dict().items():
                     self.assertTrue(torch.equal(actual, self.expected[name]), name)
 
@@ -103,8 +108,12 @@ class KimiaNetWeightsTests(unittest.TestCase):
         shape["classifier.bias"] = torch.zeros(3)
         nonfinite = OrderedDict(self.expected)
         nonfinite["classifier.bias"] = torch.tensor([float("nan"), 1])
-        for checkpoint, message in ((missing, "keys do not match"), (extra, "keys do not match"),
-                                    (shape, "shape mismatch"), (nonfinite, "non-finite")):
+        for checkpoint, message in (
+            (missing, "keys do not match"),
+            (extra, "keys do not match"),
+            (shape, "shape mismatch"),
+            (nonfinite, "non-finite"),
+        ):
             with self.subTest(message=message):
                 before = {name: value.clone() for name, value in self.model.state_dict().items()}
                 torch.save(checkpoint, self.path)

@@ -1,4 +1,3 @@
-import argparse
 import csv
 import json
 import tempfile
@@ -10,7 +9,7 @@ import h5py
 import numpy as np
 from PIL import Image
 
-from scripts import run_14_wsi_pilot as pilot
+from lung_wsi_mil.workflows import pilot as pilot
 
 
 class _FakeSlide:
@@ -42,17 +41,25 @@ class PilotSelectionTests(unittest.TestCase):
             outputs = root / "outputs"
             pilot._validate_run_directories(inputs, outputs, project)
             for output in (project, project / "results", root):
-                with self.subTest(output=output), self.assertRaisesRegex(ValueError, "outside the repository"):
+                with (
+                    self.subTest(output=output),
+                    self.assertRaisesRegex(ValueError, "outside the repository"),
+                ):
                     pilot._validate_run_directories(inputs, output, project)
             for output in (inputs, inputs / "outputs"):
-                with self.subTest(output=output), self.assertRaisesRegex(ValueError, "must not overlap"):
+                with (
+                    self.subTest(output=output),
+                    self.assertRaisesRegex(ValueError, "must not overlap"),
+                ):
                     pilot._validate_run_directories(inputs, output, project)
 
     def test_pinned_cohort_matches_frozen_inventory(self):
         project = Path(__file__).resolve().parents[1]
         inventory = pilot._load_inventory(project / "metadata/dataset_inventory.csv")
         by_slide = {row["slide_id"]: row for row in inventory}
-        with (project / "metadata/pilot14_selection.csv").open(newline="", encoding="utf-8") as handle:
+        with (project / "metadata/pilot14_selection.csv").open(
+            newline="", encoding="utf-8"
+        ) as handle:
             selected = list(csv.DictReader(handle))
         self.assertEqual(len(selected), 14)
         self.assertEqual(len({row["patient_id"] for row in selected}), 14)
@@ -147,8 +154,9 @@ class PilotStorageIntegrationTests(unittest.TestCase):
             "expected_md5": "a" * 32,
             "computed_md5": "a" * 32,
         }
-        with mock.patch.object(pilot, "open_slide", return_value=_FakeSlide()), mock.patch.object(
-            pilot, "extract_patch", side_effect=self._patch
+        with (
+            mock.patch.object(pilot, "open_slide", return_value=_FakeSlide()),
+            mock.patch.object(pilot, "extract_patch", side_effect=self._patch),
         ):
             metadata = pilot._save_augmented_views(
                 slide_path="fake.svs",

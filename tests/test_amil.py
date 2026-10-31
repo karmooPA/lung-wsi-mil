@@ -35,8 +35,10 @@ class AMILContractTests(unittest.TestCase):
         self.assertTrue(((prediction == 0) | (prediction == 1)).all().item())
         self.assertTrue((attention >= 0).all().item())
         torch.testing.assert_close(
-            attention.sum(dim=1), torch.ones(1, device=attention.device),
-            rtol=1e-5, atol=1e-6,
+            attention.sum(dim=1),
+            torch.ones(1, device=attention.device),
+            rtol=1e-5,
+            atol=1e-6,
         )
 
     def test_constructor_defaults_and_single_head_architecture(self):
@@ -48,8 +50,9 @@ class AMILContractTests(unittest.TestCase):
         self.assertEqual(self.model.attention_dim, 128)
         self.assertEqual(self.model.threshold, 0.5)
         linears = [m for m in self.model.modules() if isinstance(m, nn.Linear)]
-        self.assertEqual([(m.in_features, m.out_features) for m in linears],
-                         [(1024, 128), (128, 1), (1024, 1)])
+        self.assertEqual(
+            [(m.in_features, m.out_features) for m in linears], [(1024, 128), (128, 1), (1024, 1)]
+        )
         self.assertEqual(sum(isinstance(m, nn.Tanh) for m in self.model.modules()), 1)
         self.assertEqual(sum(isinstance(m, nn.Sigmoid) for m in self.model.modules()), 1)
         self.assertIsInstance(self.model.attention_hidden[0], nn.Linear)
@@ -59,10 +62,14 @@ class AMILContractTests(unittest.TestCase):
 
     def test_constructor_rejects_invalid_dimensions_heads_and_thresholds(self):
         for kwargs in (
-            {"input_dim": 0}, {"input_dim": -1},
-            {"attention_dim": 0}, {"attention_dim": -1},
-            {"k": 0}, {"k": 2},
-            {"threshold": -0.01}, {"threshold": 1.01},
+            {"input_dim": 0},
+            {"input_dim": -1},
+            {"attention_dim": 0},
+            {"attention_dim": -1},
+            {"k": 0},
+            {"k": 2},
+            {"threshold": -0.01},
+            {"threshold": 1.01},
             {"threshold": float("nan")},
         ):
             with self.subTest(kwargs=kwargs), self.assertRaises(ValueError):
@@ -93,7 +100,10 @@ class AMILContractTests(unittest.TestCase):
         expected_bag = attention @ x
         self.assertEqual(tuple(expected_bag.shape), (1, 1024))
         torch.testing.assert_close(
-            probability, self.model.classifier(expected_bag), rtol=1e-6, atol=1e-7,
+            probability,
+            self.model.classifier(expected_bag),
+            rtol=1e-6,
+            atol=1e-7,
         )
         classifier = self.model.classifier[0]
         expected_probability = torch.sigmoid(
@@ -140,14 +150,20 @@ class AMILContractTests(unittest.TestCase):
 
     def test_wrong_rank_feature_width_and_empty_bag_raise_clear_errors(self):
         for shape in ((1024,), (2, 3, 1024), (4, 512), (0, 1024)):
-            with self.subTest(shape=shape), self.assertRaisesRegex(ValueError, r"(?i)(shape|dimension|empty|instance)"):
+            with (
+                self.subTest(shape=shape),
+                self.assertRaisesRegex(ValueError, r"(?i)(shape|dimension|empty|instance)"),
+            ):
                 self.model(torch.empty(shape))
 
     def test_nonfinite_input_and_padding_are_rejected(self):
         for value in (float("nan"), float("inf"), float("-inf")):
             x = torch.randn(7, 1024)
             x[3, 19] = value
-            with self.subTest(value=value), self.assertRaisesRegex(ValueError, r"(?i)(finite|nan|inf|padding)"):
+            with (
+                self.subTest(value=value),
+                self.assertRaisesRegex(ValueError, r"(?i)(finite|nan|inf|padding)"),
+            ):
                 self.model(x)
         x = torch.cat((torch.randn(3, 1024), torch.full((2, 1024), -torch.inf)))
         with self.assertRaisesRegex(ValueError, r"(?i)(finite|nan|inf|padding)"):
@@ -155,7 +171,10 @@ class AMILContractTests(unittest.TestCase):
 
     def test_non_tensor_input_is_rejected_explicitly(self):
         for value in (None, [[0.0] * 1024], "not a tensor", 1):
-            with self.subTest(type=type(value).__name__), self.assertRaises((TypeError, ValueError)):
+            with (
+                self.subTest(type=type(value).__name__),
+                self.assertRaises((TypeError, ValueError)),
+            ):
                 self.model(value)
 
     def test_nonfloating_tensor_input_is_rejected_explicitly(self):
@@ -223,7 +242,9 @@ class AMILInitializationTests(unittest.TestCase):
                         self.assertTrue(torch.isfinite(layer.weight).all().item())
                         self.assertGreater(torch.count_nonzero(layer.weight).item(), 0)
                         if layer.bias is not None:
-                            torch.testing.assert_close(layer.bias, torch.zeros_like(layer.bias), rtol=0, atol=0)
+                            torch.testing.assert_close(
+                                layer.bias, torch.zeros_like(layer.bias), rtol=0, atol=0
+                            )
 
     def test_methods_match_independent_pytorch_initializers_including_biasless(self):
         template = nn.Sequential(nn.Linear(7, 5), nn.Tanh(), nn.Linear(5, 2, bias=False))
@@ -243,7 +264,9 @@ class AMILInitializationTests(unittest.TestCase):
                         if layer.bias is not None:
                             nn.init.zeros_(layer.bias)
                 for name, parameter in actual.named_parameters():
-                    torch.testing.assert_close(parameter, dict(expected.named_parameters())[name], rtol=0, atol=0)
+                    torch.testing.assert_close(
+                        parameter, dict(expected.named_parameters())[name], rtol=0, atol=0
+                    )
 
     def test_initialization_is_reproducible_for_each_method(self):
         for method in ("xavier", "kaiming"):
@@ -254,11 +277,16 @@ class AMILInitializationTests(unittest.TestCase):
                 torch.manual_seed(409)
                 initialize_weights(second, method)
                 for name, parameter in first.named_parameters():
-                    torch.testing.assert_close(parameter, dict(second.named_parameters())[name], rtol=0, atol=0)
+                    torch.testing.assert_close(
+                        parameter, dict(second.named_parameters())[name], rtol=0, atol=0
+                    )
 
     def test_unsupported_method_is_rejected_even_without_linear_layers(self):
         for model in (nn.Linear(7, 3), nn.Identity(), nn.Sequential(nn.Tanh())):
-            with self.subTest(model=type(model).__name__), self.assertRaisesRegex(ValueError, r"(?i)(method|initializ|unsupported)"):
+            with (
+                self.subTest(model=type(model).__name__),
+                self.assertRaisesRegex(ValueError, r"(?i)(method|initializ|unsupported)"),
+            ):
                 initialize_weights(model, method="unknown")
 
 

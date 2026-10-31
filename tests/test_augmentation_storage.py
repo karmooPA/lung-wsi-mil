@@ -1,15 +1,15 @@
+import json
 import tempfile
 import unittest
-import json
 from pathlib import Path
 
 import h5py
 import numpy as np
-from PIL import Image
 import torch
+from PIL import Image
 
-from src.augmentation import transform_batch
-from src.augmentation.storage import (
+from lung_wsi_mil.augmentation import transform_batch
+from lung_wsi_mil.augmentation.storage import (
     load_augmented_chunk,
     normalized_views_to_uint8,
     uint8_views_to_normalized,

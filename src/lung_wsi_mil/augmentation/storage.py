@@ -81,12 +81,7 @@ def normalized_views_to_uint8(transformed):
     cpu = transformed.detach().to(device="cpu", dtype=torch.float32)
     mean, std = _normalization_tensors(device=cpu.device)
     pixels = (cpu * std + mean).mul(255.0).round().clamp_(0.0, 255.0)
-    return (
-        pixels.to(torch.uint8)
-        .permute(0, 1, 3, 4, 2)
-        .contiguous()
-        .numpy()
-    )
+    return pixels.to(torch.uint8).permute(0, 1, 3, 4, 2).contiguous().numpy()
 
 
 def uint8_views_to_normalized(images):
@@ -106,11 +101,7 @@ def uint8_views_to_normalized(images):
         raise ValueError("Stored augmentation images must have dtype uint8.")
 
     tensor = (
-        tensor.to(device="cpu")
-        .permute(0, 1, 4, 2, 3)
-        .contiguous()
-        .to(torch.float32)
-        .div_(255.0)
+        tensor.to(device="cpu").permute(0, 1, 4, 2, 3).contiguous().to(torch.float32).div_(255.0)
     )
     mean, std = _normalization_tensors(device=tensor.device)
     return tensor.sub(mean).div(std)
@@ -132,8 +123,7 @@ def validate_augmented_hdf5(hdf5_path, *, expected=None, verify_values=True):
             missing = REQUIRED_DATASETS.difference(file.keys())
             if missing:
                 raise ValueError(
-                    "Augmentation HDF5 is missing datasets: "
-                    + ", ".join(sorted(missing))
+                    "Augmentation HDF5 is missing datasets: " + ", ".join(sorted(missing))
                 )
             images = file["images"]
             coords = file["coords"]
@@ -148,9 +138,7 @@ def validate_augmented_hdf5(hdf5_path, *, expected=None, verify_values=True):
             if coords.shape != (patch_count, 2) or coords.dtype != np.dtype(np.int64):
                 raise ValueError("coords must have dtype int64 and shape [N,2].")
             if tissue.shape != (patch_count,) or tissue.dtype != np.dtype(np.float32):
-                raise ValueError(
-                    "tissue_percentage must have dtype float32 and shape [N]."
-                )
+                raise ValueError("tissue_percentage must have dtype float32 and shape [N].")
 
             required_attrs = {
                 "format_version",
@@ -170,8 +158,7 @@ def validate_augmented_hdf5(hdf5_path, *, expected=None, verify_values=True):
             missing_attrs = required_attrs.difference(file.attrs.keys())
             if missing_attrs:
                 raise ValueError(
-                    "Augmentation HDF5 is missing attributes: "
-                    + ", ".join(sorted(missing_attrs))
+                    "Augmentation HDF5 is missing attributes: " + ", ".join(sorted(missing_attrs))
                 )
             format_version = str(file.attrs["format_version"])
             if format_version not in SUPPORTED_FORMAT_VERSIONS:
@@ -184,14 +171,26 @@ def validate_augmented_hdf5(hdf5_path, *, expected=None, verify_values=True):
                 raise ValueError("Unexpected stored image layout.")
             if str(file.attrs["stored_dtype"]) != "uint8":
                 raise ValueError("Unexpected stored dtype declaration.")
-            if str(file.attrs["restored_tensor_layout"]) != "representation,patch,channel,height,width":
+            if (
+                str(file.attrs["restored_tensor_layout"])
+                != "representation,patch,channel,height,width"
+            ):
                 raise ValueError("Unexpected restored tensor layout.")
             if str(file.attrs["restored_tensor_dtype"]) != "float32":
                 raise ValueError("Unexpected restored tensor dtype declaration.")
-            if tuple(_decode_json_attribute(file.attrs["representations"], "representations")) != REPRESENTATIONS:
+            if (
+                tuple(_decode_json_attribute(file.attrs["representations"], "representations"))
+                != REPRESENTATIONS
+            ):
                 raise ValueError("Unexpected representation order.")
-            mean = tuple(float(value) for value in _decode_json_attribute(file.attrs["imagenet_mean"], "imagenet_mean"))
-            std = tuple(float(value) for value in _decode_json_attribute(file.attrs["imagenet_std"], "imagenet_std"))
+            mean = tuple(
+                float(value)
+                for value in _decode_json_attribute(file.attrs["imagenet_mean"], "imagenet_mean")
+            )
+            std = tuple(
+                float(value)
+                for value in _decode_json_attribute(file.attrs["imagenet_std"], "imagenet_std")
+            )
             if mean != tuple(IMAGENET_MEAN) or std != tuple(IMAGENET_STD):
                 raise ValueError("Stored ImageNet normalization metadata does not match runtime.")
 
@@ -242,9 +241,7 @@ def load_augmented_chunk(hdf5_path, start=0, stop=None):
         start = int(start)
         stop = int(stop)
         if start < 0 or stop < start or stop > total:
-            raise ValueError(
-                f"Invalid slice [{start}:{stop}] for {total} stored patches."
-            )
+            raise ValueError(f"Invalid slice [{start}:{stop}] for {total} stored patches.")
         images = file["images"][:, start:stop]
         coordinates = np.asarray(file["coords"][start:stop], dtype=np.int64)
         tissue_percentage = np.asarray(

@@ -1,15 +1,15 @@
 """Regression checks for safe, portable split generation."""
 
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 import pandas as pd
 
-from scripts.generate_splits import METADATA_PATH, PROJECT, generate_splits
+from lung_wsi_mil.data.generate_splits import METADATA_PATH, PROJECT, generate_splits
 
 
 class GenerateSplitsTests(unittest.TestCase):
@@ -18,12 +18,17 @@ class GenerateSplitsTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
         self.metadata_path = self.root / "cohort.csv"
-        self.metadata = pd.DataFrame([
-            {"slide_id": f"patient_{patient:02d}_{label}",
-             "patient_id": f"patient_{patient:02d}", "label": label}
-            for patient in range(40)
-            for label in ("Normal", "Tumor")
-        ])
+        self.metadata = pd.DataFrame(
+            [
+                {
+                    "slide_id": f"patient_{patient:02d}_{label}",
+                    "patient_id": f"patient_{patient:02d}",
+                    "label": label,
+                }
+                for patient in range(40)
+                for label in ("Normal", "Tumor")
+            ]
+        )
         self.metadata.to_csv(self.metadata_path, index=False)
 
     def test_default_metadata_uses_repository_inventory(self):
@@ -35,12 +40,16 @@ class GenerateSplitsTests(unittest.TestCase):
         second = generate_splits(self.metadata_path, self.root / "second")
         first_files = sorted(path.relative_to(first) for path in first.rglob("*.csv"))
         self.assertEqual(len(first_files), 60)
-        self.assertEqual(first_files, sorted(path.relative_to(second) for path in second.rglob("*.csv")))
+        self.assertEqual(
+            first_files, sorted(path.relative_to(second) for path in second.rglob("*.csv"))
+        )
         for relative in first_files:
             self.assertEqual((first / relative).read_bytes(), (second / relative).read_bytes())
         train = pd.read_csv(first / "seed_2" / "train_cv.csv")
         test = pd.read_csv(first / "seed_2" / "test.csv")
-        self.assertEqual(set(train["slide_id"]) | set(test["slide_id"]), set(self.metadata["slide_id"]))
+        self.assertEqual(
+            set(train["slide_id"]) | set(test["slide_id"]), set(self.metadata["slide_id"])
+        )
         self.assertTrue(set(train["patient_id"]).isdisjoint(test["patient_id"]))
 
     def test_existing_output_is_preserved_without_reading_input(self):
@@ -63,8 +72,16 @@ class GenerateSplitsTests(unittest.TestCase):
             relative = expected_path.relative_to(PROJECT / "splits")
             with self.subTest(split=str(relative)):
                 columns = ["slide_id", "patient_id", "label"]
-                expected = pd.read_csv(expected_path)[columns].sort_values("slide_id").reset_index(drop=True)
-                actual = pd.read_csv(output / relative)[columns].sort_values("slide_id").reset_index(drop=True)
+                expected = (
+                    pd.read_csv(expected_path)[columns]
+                    .sort_values("slide_id")
+                    .reset_index(drop=True)
+                )
+                actual = (
+                    pd.read_csv(output / relative)[columns]
+                    .sort_values("slide_id")
+                    .reset_index(drop=True)
+                )
                 pd.testing.assert_frame_equal(actual, expected)
 
     def test_invalid_metadata_does_not_publish_outputs(self):
@@ -83,7 +100,10 @@ class GenerateSplitsTests(unittest.TestCase):
                 self.assertFalse(output.exists())
 
     def test_failed_generation_cleans_staging_and_publishes_nothing(self):
-        with patch("scripts.generate_splits.save_all_splits", side_effect=ValueError("cannot split")):
+        with patch(
+            "lung_wsi_mil.data.generate_splits.save_all_splits",
+            side_effect=ValueError("cannot split"),
+        ):
             with self.assertRaisesRegex(ValueError, "cannot split"):
                 generate_splits(self.metadata_path, self.root / "failed")
         self.assertFalse((self.root / "failed").exists())
@@ -91,8 +111,14 @@ class GenerateSplitsTests(unittest.TestCase):
 
     def test_cli_works_from_another_working_directory_and_refuses_rerun(self):
         output = self.root / "cli-output"
-        command = [sys.executable, str(PROJECT / "scripts" / "generate_splits.py"),
-                   "--metadata", str(self.metadata_path), "--output-dir", str(output)]
+        command = [
+            sys.executable,
+            str(PROJECT / "scripts" / "generate_splits.py"),
+            "--metadata",
+            str(self.metadata_path),
+            "--output-dir",
+            str(output),
+        ]
         first = subprocess.run(command, cwd=self.root, text=True, capture_output=True)
         self.assertEqual(first.returncode, 0, first.stderr)
         original = (output / "seed_2" / "test.csv").read_bytes()

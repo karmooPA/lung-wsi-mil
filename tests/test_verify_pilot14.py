@@ -11,9 +11,9 @@ import h5py
 import numpy as np
 from PIL import Image
 
-from scripts import run_14_wsi_pilot as pilot
-from scripts import verify_pilot14 as verifier
-from src.augmentation.data_augmentations import IMAGENET_MEAN, IMAGENET_STD, PATCH_SIZE
+from lung_wsi_mil.augmentation.data_augmentations import IMAGENET_MEAN, IMAGENET_STD, PATCH_SIZE
+from lung_wsi_mil.workflows import pilot as pilot
+from lung_wsi_mil.workflows import verify_pilot as verifier
 
 
 class _FakeSlide:
@@ -109,10 +109,7 @@ class SlideFixture:
         _write_csv(
             preprocessing / "valid_patches.csv",
             ("x", "y", "tissue_percentage"),
-            [
-                {"x": int(x), "y": int(y), "tissue_percentage": "50.000000"}
-                for x, y in coordinates
-            ],
+            [{"x": int(x), "y": int(y), "tissue_percentage": "50.000000"} for x, y in coordinates],
         )
         (preprocessing / "result.json").write_text(
             json.dumps(
@@ -120,9 +117,7 @@ class SlideFixture:
                     "status": "success",
                     "slide_path": str(self.source.resolve()),
                     "config": self.preprocessing_config,
-                    "config_fingerprint": pilot.config_fingerprint(
-                        self.preprocessing_config
-                    ),
+                    "config_fingerprint": pilot.config_fingerprint(self.preprocessing_config),
                     "source": {
                         "size_bytes": source_stat.st_size,
                         "mtime_ns": source_stat.st_mtime_ns,
@@ -158,10 +153,14 @@ class SlideFixture:
             ),
             axis=-1,
         ).astype(np.uint8)
-        originals = np.stack(
-            [np.roll(base, index, axis=0) for index in range(patch_count)],
-            axis=0,
-        ) if patch_count else np.empty((0, PATCH_SIZE, PATCH_SIZE, 3), dtype=np.uint8)
+        originals = (
+            np.stack(
+                [np.roll(base, index, axis=0) for index in range(patch_count)],
+                axis=0,
+            )
+            if patch_count
+            else np.empty((0, PATCH_SIZE, PATCH_SIZE, 3), dtype=np.uint8)
+        )
         aug1 = originals.copy() if aug1_identical else np.roll(originals, 1, axis=2)
         aug2 = originals.copy() if aug2_identical else (255 - originals)
         self.images = np.stack((originals, aug1, aug2), axis=0)
@@ -257,10 +256,13 @@ class SlideFixture:
         self._write_complete()
 
     def verify(self):
-        with mock.patch.object(verifier, "open_slide", return_value=_FakeSlide()), mock.patch.object(
-            verifier,
-            "extract_patch",
-            return_value=self.original_image,
+        with (
+            mock.patch.object(verifier, "open_slide", return_value=_FakeSlide()),
+            mock.patch.object(
+                verifier,
+                "extract_patch",
+                return_value=self.original_image,
+            ),
         ):
             return verifier._verify_slide(
                 self.row,
@@ -303,13 +305,9 @@ class PilotVerifierTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as directory:
             fixture = SlideFixture(Path(directory), save_qc=False)
-            complete = json.loads(
-                (fixture.slide_dir / "complete.json").read_text(encoding="utf-8")
-            )
+            complete = json.loads((fixture.slide_dir / "complete.json").read_text(encoding="utf-8"))
             complete["source_identity"]["source_size_bytes"] += 1
-            (fixture.slide_dir / "complete.json").write_text(
-                json.dumps(complete), encoding="utf-8"
-            )
+            (fixture.slide_dir / "complete.json").write_text(json.dumps(complete), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "Completion source identity"):
                 fixture.verify()
 
@@ -460,9 +458,7 @@ class PilotVerifierTests(unittest.TestCase):
                 "run_fingerprint": "test-run",
                 "pipeline_code_sha256": "a" * 64,
             }
-            (root / "run_config.json").write_text(
-                json.dumps(run_config), encoding="utf-8"
-            )
+            (root / "run_config.json").write_text(json.dumps(run_config), encoding="utf-8")
             selection = []
             manifest = []
             for index in range(14):
@@ -494,12 +490,10 @@ class PilotVerifierTests(unittest.TestCase):
                     "source_reextract_samples": 0,
                 }
 
-            with mock.patch.object(
-                verifier, "_code_fingerprint", return_value="b" * 64
-            ), mock.patch.object(
-                verifier, "_validate_control_files", return_value=[]
-            ), mock.patch.object(
-                verifier, "_verify_slide", side_effect=verified_detail
+            with (
+                mock.patch.object(verifier, "_code_fingerprint", return_value="b" * 64),
+                mock.patch.object(verifier, "_validate_control_files", return_value=[]),
+                mock.patch.object(verifier, "_verify_slide", side_effect=verified_detail),
             ):
                 report = verifier.verify(root, source_sample_count=0)
 
@@ -513,9 +507,7 @@ class PilotVerifierTests(unittest.TestCase):
                     for error in report["errors"]
                 )
             )
-            saved = json.loads(
-                (root / "verification.json").read_text(encoding="utf-8")
-            )
+            saved = json.loads((root / "verification.json").read_text(encoding="utf-8"))
             self.assertEqual(saved["status"], "FAILED")
 
 

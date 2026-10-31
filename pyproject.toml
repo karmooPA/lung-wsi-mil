@@ -16,6 +16,18 @@ authors = [
 ]
 dynamic = ["dependencies", "optional-dependencies"]
 
+[project.scripts]
+lung-wsi-audit = "lung_wsi_mil.audit.inventory:main"
+lung-wsi-validate-sources = "lung_wsi_mil.audit.sources:main"
+lung-wsi-preprocess = "lung_wsi_mil.preprocessing.batch_preprocessing:main"
+lung-wsi-preview = "lung_wsi_mil.augmentation.preview:main"
+lung-wsi-pilot = "lung_wsi_mil.workflows.pilot:main"
+lung-wsi-process = "lung_wsi_mil.workflows.dataset:main"
+lung-wsi-verify-pilot = "lung_wsi_mil.workflows.verify_pilot:main"
+lung-wsi-verify-dataset = "lung_wsi_mil.workflows.verify_dataset:main"
+lung-wsi-extract = "lung_wsi_mil.features.extract:main"
+lung-wsi-splits = "lung_wsi_mil.data.generate_splits:main"
+
 [project.urls]
 Repository = "https://github.com/karmooPA/lung-wsi-mil"
 
