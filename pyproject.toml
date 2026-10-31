@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lung-wsi-mil"
+version = "0.1.0"
+description = "Reproducible TCGA-LUSC preprocessing, KimiaNet features, and attention MIL"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+  {name = "karmooPA", email = "kardostmohammad.h.p@gmail.com"},
+  {name = "mragetsars", email = "mragetsars@gmail.com"},
+]
+dynamic = ["dependencies", "optional-dependencies"]
+
+[project.urls]
+Repository = "https://github.com/karmooPA/lung-wsi-mil"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["lung_wsi_mil*"]
+namespaces = false
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements/base.txt"]}
+
+[tool.setuptools.dynamic.optional-dependencies]
+audit = {file = ["requirements/audit.txt"]}
+augmentation = {file = ["requirements/augmentation.txt"]}
+mil = {file = ["requirements/augmentation.txt", "requirements/mil.txt"]}
+dev = {file = ["requirements/augmentation.txt", "requirements/mil.txt", "requirements/dev.txt"]}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]
+addopts = "-ra --strict-config --strict-markers"
+norecursedirs = ["work", "build", "dist", ".git", ".venv"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["lung_wsi_mil", "tests"]

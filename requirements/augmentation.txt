@@ -1,5 +1,4 @@
 # Tested with Python 3.12 on Linux. Keep torch/torchvision as a compatible pair.
--r requirements.txt
 torch==2.14.0
 torchvision==0.29.0
 # Required by compact pilot storage, validation, and KimiaNet integration.
