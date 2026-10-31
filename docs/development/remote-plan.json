@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "target_repository": "karmooPA/lung-wsi-mil",
+  "allowed_remote_urls": [
+    "git@github.com:karmooPA/lung-wsi-mil.git",
+    "https://github.com/karmooPA/lung-wsi-mil.git"
+  ],
+  "original_branch_tips": {
+    "feature/amil-contract-validation": "214ec7e390158e1454615bef5afc5bdd150ee3ba",
+    "feature/amil-implementation": "dc6018dbc5545ca0f62e98d244624a393c8ac991",
+    "feature/data-augmentation": "027fdcd0433268d586387c517e29570b77d2e960",
+    "feature/dataset-audit": "067f5d16a8e8574d479714f3540d9f0bab9629df",
+    "feature/full-dataset-processing": "cf42b2bf648d73c035ec1bdf850b9c3cc84d61c9",
+    "feature/kimianet-features": "b142bc2af3827955434e0eff9d74d31c19cccffc",
+    "feature/mil-training-infrastructure": "d4999aaad1a9620bdb2777dfd0ba56c8367a3dbf",
+    "feature/wsi-preprocessing": "a3f699f89beb7c7ed958f596877765abbe326ba2",
+    "main": "744df59d6f2d361cf60de03564576ff65132b1dd"
+  },
+  "archive_tags": [
+    "archive/amil-contract-validation",
+    "archive/amil-implementation",
+    "archive/data-augmentation",
+    "archive/dataset-audit",
+    "archive/full-dataset-processing",
+    "archive/kimianet-features",
+    "archive/main-before-cleanup",
+    "archive/mil-training-infrastructure",
+    "archive/wsi-preprocessing"
+  ],
+  "behavior": "Atomically replace main, create archive tags, and delete only the eight recorded completed feature branches, with explicit original-tip leases."
+}

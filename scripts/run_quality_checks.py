@@ -56,6 +56,8 @@ def main():
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     python = sys.executable
     commands = [
+        ("Python lint", [python, "-m", "ruff", "check", "."]),
+        ("Python formatting", [python, "-m", "ruff", "format", "--check", "."]),
         ("Compile Python", [python, "-m", "compileall", "-q", "scripts", "src", "tests"]),
         ("Unit and integration tests", [python, "-m", "pytest", "-q", "tests"]),
         (
@@ -79,6 +81,7 @@ def main():
             ],
         ),
         ("Installed dependency consistency", [python, "-m", "pip", "check"]),
+        ("Commit identity and subject policy", [python, "scripts/git_policy.py"]),
         ("Committed-tree whitespace check", ["git", "show", "--check", "--format=", "HEAD"]),
         ("Working-tree whitespace check", ["git", "diff", "--check", "HEAD"]),
     ]

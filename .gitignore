@@ -5,6 +5,11 @@
 *.tiff
 *.ndpi
 *.mrxs
+*.[sS][vV][sS]
+*.[tT][iI][fF]
+*.[tT][iI][fF][fF]
+*.[nN][dD][pP][iI]
+*.[mM][rR][xX][sS]
 
 # Extracted features / model files
 *.h5
@@ -25,11 +30,14 @@ build/
 dist/
 *.egg-info/
 .venv/
+.venv-*/
 venv/
 env/
 
 # Environment variables
 .env
+.env.*
+!.env.example
 
 # Jupyter
 .ipynb_checkpoints/

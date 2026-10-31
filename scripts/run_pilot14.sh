@@ -6,7 +6,7 @@ project_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 workspace_parent="$(dirname -- "$project_root")"
 python_path="${LUNG_WSI_PYTHON:-$project_root/.venv/bin/python}"
 input_dir="${LUNG_WSI_INPUT_DIR:-$workspace_parent/$(basename -- "$project_root")-inputs/pilot14}"
-output_dir="${LUNG_WSI_OUTPUT_DIR:-$workspace_parent/$(basename -- "$project_root")-outputs/pilot14-final}"
+output_dir="${LUNG_WSI_OUTPUT_DIR:-$workspace_parent/$(basename -- "$project_root")-outputs/pilot14-current}"
 
 if [[ ! -x "$python_path" ]]; then
     printf 'Python environment not found: %s\n' "$python_path" >&2

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Read-only, reproducible TCGA WSI inventory and integrity audit.
 
-Default invocation: python src/lung_wsi_mil/audit/inventory.py
+Default invocation: lung-wsi-audit
 Rebuilds the inventory from bundled sources and explicitly recorded pilot evidence.
 Use --mode local --data-root PATH for a new scan. No WSI is altered.
 """

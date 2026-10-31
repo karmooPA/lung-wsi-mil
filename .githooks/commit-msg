@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+project_root=$(git rev-parse --show-toplevel)
+if command -v python3 >/dev/null 2>&1; then
+    interpreter=python3
+else
+    interpreter=python
+fi
+exec "$interpreter" "$project_root/scripts/git_policy.py" --commit-message "$1"

@@ -8,7 +8,7 @@ preprocessing pipeline, extracts every valid patch, applies Original/Aug1/Aug2
 in bounded chunks, and saves the results losslessly in compressed HDF5 files.
 
 Example:
-    python src/lung_wsi_mil/workflows/pilot.py \
+    lung-wsi-pilot \
         /data/TCGA-LUSC \
         ../lung-wsi-mil-outputs/pilot14 \
         --inventory metadata/dataset_inventory.csv \

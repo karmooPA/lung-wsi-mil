@@ -1,4 +1,4 @@
-"""Task-PDF augmentation protocol; see docs/data-augmentation.md for deviations.
+"""Task-PDF augmentation protocol; see docs/data/augmentation.md for deviations.
 
 The historical name RandomGaussianNoise denotes BLUR, not additive noise.
 Use a caller-owned numpy.random.Generator for reproducible independent draws.
