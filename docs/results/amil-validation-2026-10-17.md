@@ -36,9 +36,9 @@ metadata/evidence checks, rather than a new full raw-WSI scan.
 **The current KimiaNet feature extraction covered the frozen 14 only.** It read
 their existing patch HDF5 files under
 `D:\Meraj Rastegar\Data\TCGA_LUSC_HDF`, selected by
-[`metadata/pilot14_selection.csv`](../metadata/pilot14_selection.csv). These
+[`metadata/pilot14_selection.csv`](../../metadata/pilot14_selection.csv). These
 are the same seven Normal and seven Tumor slides described in the
-[earlier pilot preprocessing result](pilot-14-wsi-results.md). No full-cohort
+[earlier pilot preprocessing result](pilot14-2026-10-02.md). No full-cohort
 feature cache or training run is claimed here.
 
 ## Environment and measured extraction invocation
@@ -104,7 +104,7 @@ at source commit `8a2f120999e04e4e18e0057bacbd1b47c27a56be`; its stored location
 is `D:\Meraj Rastegar\Data\weights\KimiaNetPyTorchWeights.pth`. Weights, HDF5
 data and full raw reports remain outside the repository. Upstream weight terms
 and the reproducible commands are documented in
-[the acceptance procedure](amil-validation.md).
+[the acceptance procedure](../workflows/amil-validation.md).
 
 | Identity | SHA256 / fingerprint |
 | --- | --- |
@@ -128,7 +128,7 @@ reports or their duplicated test/source inventories.
 | `quality-server/quality_check_summary.json` | `a10bdd5a716048707023c43b27070133e1fe87388c68d5624c22deea56812668` |
 | `quality-server.stdout.log` | `07fb6da5e39fb1fce9f7eacd79d25395d09d81e4fd39f5c576be7d55df57c538` |
 
-A [compact machine-readable summary](runs/amil-validation-2026-10-17.json)
+A [compact machine-readable summary](amil-validation-2026-10-17.json)
 records the essential counts and identities. The retained full AMIL report
 contains named test outcomes, tested file hashes, all 14 slide records, source
 provenance and warnings.

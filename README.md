@@ -1,152 +1,128 @@
 # Lung WSI MIL
 
-MIL-based whole-slide image analysis for lung tumor detection.
+Reproducible binary **Tumor / Normal** classification research for TCGA-LUSC
+whole-slide images, using frozen KimiaNet features and attention-based MIL.
 
-## Current Task
+The frozen cohort contains **694 slides, 347 per class, from 373 patients**.
+Some patients have both Normal and Tumor tissue. All slides and derived views
+from one patient must remain in the same data partition.
 
-Binary classification of lung pathology whole-slide images:
+## Pipeline and current scope
 
-- Tumor
-- Normal
+1. Audit the frozen GDC manifest, labels, identity, and available image evidence.
+2. Detect tissue and extract 512 × 512 patches at effective 5× magnification.
+3. Keep patches with strictly more than 20% tissue; no arbitrary slide patch-count cutoff.
+4. Store aligned Original / Aug1 / Aug2 images in lossless, chunked HDF5.
+5. Stream all three views through genuine, frozen KimiaNet into 1024-dimensional embeddings.
+6. Load patient-grouped partitions, remove padding, and optimize AMIL view-bags.
 
-## Planned Pipeline
+| Component | Available implementation and evidence |
+| --- | --- |
+| Dataset audit | Offline replay and explicit local scans with source provenance |
+| Preprocessing / augmentation | Bounded pilot/full-cohort runners, resume checks, independent verification |
+| KimiaNet cache | Genuine checkpoint validation and provenance-bound streaming extraction |
+| MIL data | HDF5 Dataset, padded collate, grouped splits, five-seed / five-fold reference CSVs |
+| AMIL | Three-output model, initialization, numerical and integration tests |
+| Training | Batch and epoch optimization, binary cross-entropy, explicit padding removal |
+| Historical real data | [14-WSI / 42-view acceptance](docs/results/amil-validation-2026-10-17.md) |
+| Still to implement | Experiment runner, validation/model selection, trained checkpoints, ROC/AUC and heatmaps |
 
-WSI  
-→ Tissue Detection  
-→ Patch Extraction  
-→ Pathology Encoder  
-→ Patch Embeddings  
-→ Attention MIL  
-→ Tumor / Normal Classification  
-→ Attention Heatmap
+The historical acceptance checks an initialized model's interface and numerical
+behavior. It does not establish trained classification performance. Raw WSIs,
+KimiaNet weights and real feature caches are external inputs.
 
-## Team
+## Install
 
-- Mohammad
-- Meraj
-
-## Status
-
-Implemented and tested:
-
-- reproducible TCGA-LUSC metadata audit;
-- WSI tissue detection and Level-0 patch-coordinate extraction at a requested magnification;
-- strict patch QC with no arbitrary minimum patch-count exclusion;
-- deterministic Original/Aug1/Aug2 augmentation;
-- lossless, chunk-readable HDF5 storage for a balanced 14-WSI pilot;
-- full-dataset orchestration with bounded slide workers and per-slide resume;
-- independent artifact verification, source re-extraction checks, resume validation and QC montages.
-
-The `feature/amil-contract-validation` branch integrates KimiaNet extraction,
-the MIL data layer and AMIL. It adds a bounded streaming feature-cache CLI using
-genuine frozen KimiaNet weights, safe strict checkpoint loading, and AMIL unit,
-initialization and Dataset/DataLoader integration tests. The final acceptance
-runner requires all 14 frozen pilot slides and all 42 full view-bag forwards;
-an ordinary CI skip does not satisfy that gate. Run-specific acceptance evidence
-is recorded separately from this procedure. The
-[2026-10-17 server acceptance result](docs/amil-validation-results-2026-10-17.md)
-records the genuine 14-slide/42-bag PASS and its source/artifact identities.
-
-Training, optimization, ROC/AUC evaluation and attention heatmaps remain later
-work. AMIL currently returns exactly probability, binary prediction and attention
-weights; its padding-removal helper remains test-only.
-
-## Environment
-
-The supported development environment is Ubuntu under WSL with Python 3.12.
-Raw WSIs remain outside Git and are read from the mounted dataset drive.
-
-The local WSL workspace uses three sibling directories:
-
-```text
-/home/mrage/Codes/Python/
-├── lung-wsi-mil/          # Git repository: code, tests, metadata, documentation
-├── lung-wsi-mil-inputs/
-│   └── pilot14/           # The 14 copied WSIs, verified against inventory MD5
-└── lung-wsi-mil-outputs/
-    ├── pilot14-final/     # Current accepted preprocessing/augmentation artifacts
-    ├── quality/           # Test and audit reports
-    └── archive/           # Earlier runs, preserved as historical evidence
-```
-
-Drive M is the original data source. The pilot uses the verified local copies
-so processing is independent of drive disconnections. Directory layout and
-reproduction commands are documented in [docs/workspace-layout.md](docs/workspace-layout.md).
+Use **Python 3.12** on 64-bit Linux/WSL or Windows. From this checkout:
 
 ```bash
-python3.12 -m venv .venv/lung-wsi-augmentation
-.venv/lung-wsi-augmentation/bin/python -m pip install torch==2.14.0 torchvision==0.29.0 --index-url https://download.pytorch.org/whl/cpu
-.venv/lung-wsi-augmentation/bin/python -m pip install -r requirements-augmentation.txt
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install torch==2.14.0 torchvision==0.29.0 --index-url https://download.pytorch.org/whl/cpu
+python -m pip install -e ".[dev]"
 ```
 
-Run every portable compile, unit, integration and recorded-audit check:
+On Windows use `py -3.12 -m venv .venv` and activate
+`.venv\Scripts\Activate.ps1`. The
+[AMIL environment guide](docs/workflows/amil-validation.md) has CUDA commands.
+Install the chosen torch/torchvision wheel pair before installing the project extra.
+
+| Install target | Contents |
+| --- | --- |
+| `pip install -e .` | Preprocessing dependencies |
+| `pip install -e ".[audit]"` | Frozen-source/local WSI audit support |
+| `pip install -e ".[augmentation]"` | Three-view transforms and image HDF5 storage |
+| `pip install -e ".[mil]"` | Augmentation, feature extraction, grouped splits and MIL |
+| `pip install -e ".[dev]"` | Complete runtime, pytest, Ruff and packaging tools |
+
+Pins are defined in `requirements/` and consumed by `pyproject.toml`.
+These files are dependency components; the extras combine them without duplicated pins.
+Offline audit functions use the standard library. A dependency-free source invocation
+is `PYTHONPATH=src python -m lung_wsi_mil.audit.inventory --help`.
+
+## Verify
 
 ```bash
-.venv/lung-wsi-augmentation/bin/python scripts/run_quality_checks.py
+python scripts/run_quality_checks.py
+python -m build
 ```
 
-Run and independently verify the balanced real-data pilot:
+The quality runner checks formatting, lint, compilation, tests, frozen sources,
+recorded audit replay, dependency consistency, commit policy and whitespace.
+Reports go to `../lung-wsi-mil-outputs/quality/` by default. A plain
+`python -m pytest` discovers only `tests/`.
+
+Real-data acceptance is separate and fails when its input is missing:
 
 ```bash
-bash scripts/run_pilot14.sh
-
-.venv/lung-wsi-augmentation/bin/python scripts/verify_pilot14.py \
-  ../lung-wsi-mil-outputs/pilot14-final \
-  --verify-source-md5 --source-sample-count 100000
+python scripts/validate_amil.py --pilot14-h5 /external/pilot14-kimianet.h5 --output ../lung-wsi-mil-outputs/amil-validation.json
 ```
 
-The runner selects seven Normal and seven Tumor slides from distinct patients,
-writes atomically staged per-slide outputs, and refuses to resume stale or
-corrupt artifacts. See [docs/pilot-14-wsi.md](docs/pilot-14-wsi.md) and the
-[verified pilot result](docs/pilot-14-wsi-results.md).
+Source relocation changes code/provenance fingerprints. Keep accepted historical
+outputs as evidence and use a new output location for the reorganized pipeline;
+old caches must not be made current by editing their fingerprints.
 
-## Full dataset
+## Run
 
-Run `scripts/run_wsi_dataset.py` to process every inventory-resolved local WSI,
-then use `scripts/verify_wsi_dataset.py` for independent artifact checks, source
-MD5 validation and Original patch re-extraction. The full-dataset runner allows
-multiple slides per patient and preserves the pilot's Original/Aug1/Aug2 HDF5
-format. Patient-level splitting is still required for later model evaluation.
+```bash
+lung-wsi-validate-sources
+lung-wsi-audit --mode recorded
+lung-wsi-splits --output-dir ../lung-wsi-mil-outputs/new-splits
 
-See [docs/full-dataset.md](docs/full-dataset.md) for Windows and generic commands,
-six-worker execution, progress files and interruption/resume recovery.
+lung-wsi-pilot /external/pilot14 ../lung-wsi-mil-outputs/pilot14-new --inventory metadata/dataset_inventory.csv --selection-csv metadata/pilot14_selection.csv --verify-source-md5
+lung-wsi-verify-pilot ../lung-wsi-mil-outputs/pilot14-new --verify-source-md5
 
-## KimiaNet and AMIL
-
-Install `requirements-mil.txt` in a separate Python 3.12 environment, keeping
-`torch==2.14.0` paired with `torchvision==0.29.0`. The
-[feature-cache and AMIL validation procedure](docs/amil-validation.md) contains
-CPU and CUDA 13.0 installation commands, upstream KimiaNet checkpoint identity
-and terms, and the complete public model/padding contract. Obtain weights from
-upstream and retain them outside Git; this repository does not redistribute them.
-
-From the Windows server repository directory, after installing the CUDA
-environment and obtaining the genuine checkpoint:
-
-```powershell
-$milPython = '.\.venv\lung-wsi-mil\Scripts\python.exe'
-$featureCache = 'D:\Meraj Rastegar\Outputs\amil-contract\pilot14-kimianet.h5'
-& $milPython scripts/extract_kimianet_features.py `
-  --patch-root 'D:\Meraj Rastegar\Data\TCGA_LUSC_HDF' `
-  --selection metadata/pilot14_selection.csv `
-  --inventory metadata/dataset_inventory.csv `
-  --weights 'D:\Meraj Rastegar\Weights\KimiaNetPyTorchWeights.pth' `
-  --output $featureCache --batch-size 8 --device cuda
-
-& $milPython scripts/validate_amil.py `
-  --pilot14-h5 $featureCache `
-  --output 'D:\Meraj Rastegar\Outputs\amil-contract\amil-validation.json'
+lung-wsi-process /external/TCGA-LUSC ../lung-wsi-mil-outputs/cohort-new --inventory metadata/dataset_inventory.csv --workers 6 --verify-source-md5
+lung-wsi-extract --help
 ```
 
-Use `--device cpu` with a CPU environment. Extraction `--resume` reuses a
-complete cache only after validating matching provenance and every group;
-interrupted feature stages rerun. The acceptance command exits nonzero for a
-missing real HDF5, any required failure/skip, or incomplete 14-WSI/42-view
-coverage. Keep generated caches and JSON reports outside the source repository.
+Commands accept `--help`. Existing `scripts/*.py` launchers remain available;
+their importable implementations now live in `lung_wsi_mil`. Old Python imports
+under `src.*` should be changed to `lung_wsi_mil.*`.
 
-## Dataset audit
+## Repository map
 
-See [docs/dataset-audit.md](docs/dataset-audit.md) for the reproducible audit,
-source provenance, patient grouping and remaining full-data checks. Run
-`python scripts/inspect_dataset.py` to replay the recorded pilot evidence
-without requiring WSI files. This is not a fresh full-dataset scan.
+| Path | Purpose |
+| --- | --- |
+| `src/lung_wsi_mil/` | Installable audit, augmentation, data, features, MIL, preprocessing and workflows |
+| `scripts/` | Compatibility launchers, quality/acceptance runners and Git tools |
+| `tests/` | Portable tests and explicit optional real-data/device checks |
+| `metadata/source/` | Byte-preserved frozen source documents |
+| `metadata/` | Committed cohort inventory and recorded evidence summaries |
+| `splits/` | Frozen patient-aware reference partitions |
+| `requirements/` | Single-source pinned dependency components |
+| `docs/` | [Guide index](docs/README.md), architecture, workflows and dated results |
+
+## Contributors and Git handoff
+
+- **karmooPA**: original preprocessing, feature APIs, MIL data/splits, AMIL and training.
+- **mragetsars**: cohort audit, augmentation, orchestration, feature-cache provenance and acceptance.
+
+See [ownership evidence](docs/development/ownership.md),
+[contribution conventions](CONTRIBUTING.md), and the
+[history rewrite / force-push guide](docs/development/git-history.md).
+The delivered checkout includes its complete `.git` directory. No remote push
+was performed during organization.
+
+The source code retains its original [MIT license](LICENSE). KimiaNet weights
+retain their separate upstream agreement, linked in the AMIL guide.

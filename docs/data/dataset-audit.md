@@ -50,8 +50,7 @@ The article's abstract (p. 1) and supplied pipeline-selection PDF p. 3 say 349
 slides per class; the article's TCGA-LUSC section (p. 4) and this frozen cohort
 support **347 per class, 694 total**. This is an inconsistency within the paper
 itself, repeated in the secondary document. The manifest is not padded to 698.
-Source CRLF bytes are intentionally preserved with `metadata/.gitattributes`;
-apply the mailbox patch using `git am --keep-cr` as in the delivery guide.
+Source CRLF bytes are intentionally preserved with `metadata/.gitattributes`; normal source-code line-ending settings must not alter frozen inputs.
 
 The scanner and regression tests were adapted from the supplied standalone
 package. No preprocessing or feature code was replaced. Omitted: PDF generator,
@@ -62,7 +61,7 @@ independently reproducible.
 
 ## Run
 
-Python 3.10+; no third-party dependency is needed for offline runs or audit tests.
+Python 3.12; no third-party dependency is needed for offline runs or audit tests.
 Run from the repository root. Outputs default to `../lung-wsi-mil-outputs/dataset-audit/`
 so a routine run does not overwrite the committed handoff.
 
@@ -80,10 +79,10 @@ Summary generation time and installed-software fields vary by run. Local image
 measurement timestamps also vary. Inputs, sorting and file measurements determine
 all other values; nothing is derived from PDF example numbers.
 
-For new image measurements, install only the audit requirements:
+For new image measurements, install the audit package extra:
 
 ```bash
-python -m pip install -r requirements-audit.txt
+python -m pip install -e ".[audit]"
 # Complete dataset root; expected-but-absent files are missing:
 python scripts/inspect_dataset.py --mode local --data-root /path/to/TCGA_LUSC_WSI --verify-md5 --strict
 # A deliberately small sample; unobserved cohort members stay untested:
@@ -161,11 +160,12 @@ must stay in **one** train/validation/test partition. Split the 373 patients,
 then map slides to partitions; never split the 694 rows independently. Retain
 both tissue labels for mixed patients and check patient-set intersections are
 empty. `Normal` is Solid Tissue Normal from this cancer cohort, not a claim of
-healthy-donor status. No actual split or downstream model is implemented here.
+healthy-donor status. The audit itself does not split data; patient-aware reference partitions and the AMIL/training APIs now live in `lung_wsi_mil.data` and `lung_wsi_mil.mil`.
 
-To finish the brief: run full local mode on all 694 files after downloads finish,
+To refresh the image audit, run full local mode on all 694 source files,
 review missing/partial/extra/duplicate/integrity/metadata problems, and record
 exclusions with the team. Review regenerated reports before committing them.
 Even a complete probe+MD5 pass is not exhaustive pixel or histology QC. Fresh
-verification of the two pilot WSIs is also pending in this environment. Push,
-PR creation and main merge are deliberately left to the user/reviewer.
+verification of real WSIs requires the external files. Historical full-cohort
+and pilot evidence is described separately in the dated results. Remote
+publication of this reorganized checkout remains with the user.

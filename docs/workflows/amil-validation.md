@@ -1,22 +1,24 @@
 # KimiaNet feature cache and AMIL acceptance procedure
 
-The `feature/amil-contract-validation` branch connects the existing saved
+The `main` branch connects the existing saved
 Original/Aug1/Aug2 patch views to frozen KimiaNet features and the AMIL public
 contract. This document describes the procedure and acceptance criteria.
 Run-specific results, tested commits, hashes, counts and limitations are recorded
 separately after execution; the presence of these commands is not evidence that
 the real-data acceptance gate passed.
 
-Training, optimization, checkpoint selection, ROC/AUC and attention heatmaps
-remain later work. Randomly initialized AMIL predictions in this gate measure
+Batch/epoch training is available in `lung_wsi_mil.mil.training`; this gate does
+not train a model. Checkpoint selection, ROC/AUC and heatmaps remain later work.
+Randomly initialized AMIL predictions in this gate measure
 interface and numerical correctness, rather than diagnostic performance.
 
 ## Environment
 
-Use Python 3.12 and `requirements-mil.txt`, which includes the existing
-augmentation requirements plus pinned pandas, scikit-learn and pytest. Keep
+Use Python 3.12 and the `.[dev]` extra for this acceptance procedure, which also
+runs pytest regressions. The `.[mil]` extra is sufficient for extraction and the
+training APIs. Keep
 PyTorch **2.14.0** and torchvision **0.29.0** as a pair. Install the selected
-CPU/CUDA wheels first, then the requirements file; use a separate environment
+CPU/CUDA wheels first, then install the project extra; use a separate environment
 to preserve the previous augmentation runtime.
 
 CPU example on Ubuntu/WSL:
@@ -24,7 +26,7 @@ CPU example on Ubuntu/WSL:
 ```bash
 python3.12 -m venv .venv/lung-wsi-mil-cpu
 .venv/lung-wsi-mil-cpu/bin/python -m pip install torch==2.14.0 torchvision==0.29.0 --index-url https://download.pytorch.org/whl/cpu
-.venv/lung-wsi-mil-cpu/bin/python -m pip install -r requirements-mil.txt
+.venv/lung-wsi-mil-cpu/bin/python -m pip install -e ".[dev]"
 ```
 
 CUDA 13.0 example on the Windows server, whose driver must support that runtime:
@@ -33,7 +35,7 @@ CUDA 13.0 example on the Windows server, whose driver must support that runtime:
 py -3.12 -m venv .venv\lung-wsi-mil
 $milPython = '.\.venv\lung-wsi-mil\Scripts\python.exe'
 & $milPython -m pip install torch==2.14.0 torchvision==0.29.0 --index-url https://download.pytorch.org/whl/cu130
-& $milPython -m pip install -r requirements-mil.txt
+& $milPython -m pip install -e ".[dev]"
 & $milPython -c "import torch, torchvision; print(torch.__version__, torchvision.__version__, torch.cuda.is_available())"
 ```
 
@@ -69,11 +71,11 @@ SHA256; it does not substitute random weights when loading fails.
 
 ## Frozen cohort and source contract
 
-[`metadata/pilot14_selection.csv`](../metadata/pilot14_selection.csv) pins the
+[`metadata/pilot14_selection.csv`](../../metadata/pilot14_selection.csv) pins the
 same 14 slide IDs and patient identities used by the accepted preprocessing
 pilot: seven Normal and seven Tumor slides. Labels and case IDs come from the
-frozen [`metadata/dataset_inventory.csv`](../metadata/dataset_inventory.csv).
-See [the earlier preprocessing/augmentation result](pilot-14-wsi-results.md)
+frozen [`metadata/dataset_inventory.csv`](../../metadata/dataset_inventory.csv).
+See [the earlier preprocessing/augmentation result](../results/pilot14-2026-10-02.md)
 for its per-slide identities and source hashes. That historical result does not
 establish KimiaNet or AMIL acceptance.
 
@@ -99,9 +101,9 @@ obtained from upstream, run:
 
 ```powershell
 $milPython = '.\.venv\lung-wsi-mil\Scripts\python.exe'
-$patchRoot = 'D:\Meraj Rastegar\Data\TCGA_LUSC_HDF'
-$weights = 'D:\Meraj Rastegar\Data\weights\KimiaNetPyTorchWeights.pth'
-$featureCache = 'D:\Meraj Rastegar\Data\AMIL_Validation_20261017\pilot14-kimianet.h5'
+$patchRoot = 'D:\Data\TCGA_LUSC_HDF'
+$weights = 'D:\Weights\KimiaNetPyTorchWeights.pth'
+$featureCache = 'D:\Outputs\AMIL_Current\pilot14-kimianet.h5'
 
 & $milPython scripts/extract_kimianet_features.py `
   --patch-root $patchRoot `
@@ -165,13 +167,13 @@ The existing Dataset, collate and DataLoader interfaces are preserved. Collate
 expands `B` WSI to `3B` bags and pads embeddings with `-Inf` and coordinates
 with `[-1,-1]`. AMIL consumes one clean finite bag rather than padded batches.
 The padding helper in `tests/test_amil_pipeline.py` belongs only to validation;
-it checks aligned complete tail sentinels before trimming. A future training
-loop must own production padding removal.
+it checks aligned complete tail sentinels before trimming. Production padding
+removal lives in `lung_wsi_mil.mil.bag_utils` and is called by the training loop.
 
-Since the public classifier returns probabilities, a later training task should
-choose `BCELoss` for that output. Using `BCEWithLogitsLoss` would require a
-separate agreed logits interface. This branch introduces no training loop,
-optimizer step or change to the three-output API.
+The public classifier returns probabilities. The integrated training loop uses
+validated binary cross-entropy on those probabilities. `BCEWithLogitsLoss`
+would require a separately agreed logits interface. See [training.md](training.md)
+for the current optimizer API; the three-output model contract is preserved.
 
 ## Run the acceptance gate
 
@@ -182,7 +184,7 @@ regression modules. Save its JSON report outside the repository:
 ```powershell
 & $milPython scripts/validate_amil.py `
   --pilot14-h5 $featureCache `
-  --output 'D:\Meraj Rastegar\Data\AMIL_Validation_20261017\amil-validation.json'
+  --output 'D:\Outputs\AMIL_Current\amil-validation.json'
 ```
 
 For individual development tests on Ubuntu/WSL:

@@ -17,14 +17,13 @@ represented in the manifest with an empty HDF5 and
 
 ## Run
 
-Keep inputs and outputs outside the repository in disjoint directories. The
-current Windows workspace uses the following PowerShell commands from
-`D:\Meraj Rastegar\Source`:
+Keep inputs and outputs outside the repository in disjoint directories. For a new run, the following PowerShell example uses external input/output
+paths and a prepared environment:
 
 ```powershell
-& '.\.venv\lung-wsi-augmentation\Scripts\python.exe' scripts/run_wsi_dataset.py `
-  'D:\Meraj Rastegar\Data\TCGA_LUSC_WSI' `
-  'D:\Meraj Rastegar\Data\TCGA_LUSC_HDF' `
+& '.\.venv\Scripts\python.exe' scripts/run_wsi_dataset.py `
+  'D:\Data\TCGA_LUSC_WSI' `
+  'D:\Outputs\TCGA_LUSC_HDF_Current' `
   --inventory metadata/dataset_inventory.csv `
   --workers 6 --verify-source-md5 `
   --seed 42 --chunk-size 8 --qc-sample-count 6
@@ -90,8 +89,8 @@ Each `patch_views.h5` preserves the pilot format:
 - `tissue_percentage`: float32 `[N]`.
 
 Gzip-compressed RGB storage reconstructs the pipeline's normalized float32
-tensors exactly. Use `src.augmentation.storage.load_augmented_chunk` for
-bounded downstream reads. See [pilot-14-wsi.md](pilot-14-wsi.md) for the shared
+tensors exactly. Use `lung_wsi_mil.augmentation.storage.load_augmented_chunk` for
+bounded downstream reads. See [pilot-14-wsi.md](pilot14.md) for the shared
 HDF5 layout and loader example.
 
 ## Resume and independent verification
@@ -108,8 +107,8 @@ After the runner finishes, independently verify every artifact, rehash every
 source, and compare stored Original images to source re-extractions:
 
 ```powershell
-& '.\.venv\lung-wsi-augmentation\Scripts\python.exe' scripts/verify_wsi_dataset.py `
-  'D:\Meraj Rastegar\Data\TCGA_LUSC_HDF' `
+& '.\.venv\Scripts\python.exe' scripts/verify_wsi_dataset.py `
+  'D:\Outputs\TCGA_LUSC_HDF_Current' `
   --verify-source-md5 --source-sample-count 100000 --workers 6 --threads 1
 ```
 

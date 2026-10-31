@@ -1,0 +1,29 @@
+original_commit,rewritten_commit,owner,original_subject,rewritten_subject
+007d7427c2ed3fefa501e9fd91bd6cfa714edba4,e88ac5adead90d245de35f4bec1d4ad6c65dc1d9,karmooPA,Initialize project structure,chore(repo): initialize source repository
+f4a0067dcd6ce571ec6b557973866fe98ba08824,2b8a6b050c8ee8043600cc7716ac6f710ea6bb2f,karmooPA,Initial commit,chore(repo): initialize license and project readme
+7d802c83f0bf15dc2121fa352c518ee83d071acb,f62a21cd8a9822f6441938f43b8cc3c62c63c14c,karmooPA,Merge remote main and keep project README,merge(repo): reconcile initial repository histories
+82a747ebbd14cb5608aff2fc8a56f1eb943c5f71,0dab0c3e3690db0e2092e3a377f7e3c3a7d39c99,karmooPA,Add project directory structure,chore(repo): scaffold project directories
+f4b734366600085bc2789c0183d5dd2b39ae11d4,f890e1fafff9c1a2264b236381bd26d366da8b2c,karmooPA,Update README.md,docs(readme): describe the lung WSI classification pipeline
+6f18b2ecd4822416fbfc79f31f56812f35c10a4f,fdbf7c76e3fc35566a0b0dc494a98f05b1a9f518,karmooPA,Merge remote main updates,merge(repo): integrate project documentation updates
+067f5d16a8e8574d479714f3540d9f0bab9629df,89b41fde1c8cf888de5b6f9bc325d8be1b76ad5a,mragetsars,Add reproducible TCGA-LUSC audit with explicit evidence provenance,feat(audit): add reproducible TCGA-LUSC cohort audit
+34ba748de432342798212fad85f7cc9b501158aa,430b0698816e025a5749a772cf699695e9715aa4,mragetsars,Merge pull request #2 from karmooPA/feature/dataset-audit,merge(audit): integrate frozen cohort audit and provenance
+9f83bb4749e62738efc7e26f4737510188063823,3925eac9eac64ae9fea1cafdf1e8b328a104f1d0,karmooPA,Add WSI reader and thumbnail generation,feat(preprocessing): add WSI reader and thumbnails
+19675ad9d865e3a355420f1ddb396d5561cd4f00,bdb119c4bdbc8359aa601dc97e7db1f02f6828be,karmooPA,Add tissue detection and color filtering,feat(preprocessing): detect tissue and filter color distances
+1e136b3a77e4357733ae2f540a479fa6bdcee7f7,3c25152080d6fc96b2a58b8b91b13f029c0cec96,karmooPA,Complete WSI patch extraction and preprocessing pipeline,feat(preprocessing): extract patches and compose the slide pipeline
+a3f699f89beb7c7ed958f596877765abbe326ba2,b439d92eb96765f298194e87e6476d0334b3a9b0,karmooPA,Complete WSI preprocessing pipeline and batch runner,feat(preprocessing): add batch processing and quality control
+027fdcd0433268d586387c517e29570b77d2e960,3d68dbb24fee6dfb61e5dde02065334afa89526e,mragetsars,Add three-view WSI patch augmentation and KimiaNet contract tests,feat(augmentation): add deterministic three-view patch transforms
+678e37bbb6216ef7499b0b84075425bb3d636895,7232b9be727e1c68bff165dd4eb992e34462d717,mragetsars,Merge pull request #1 from karmooPA/feature/data-augmentation,merge(augmentation): integrate three-view patch augmentation
+744df59d6f2d361cf60de03564576ff65132b1dd,dff084b5126b45b2f7cb488148e06242cf675235,mragetsars,Harden WSI pilot validation and separate WSL input and output workspaces,fix(workflows): harden pilot validation and isolate runtime outputs
+6b66a1c0a53cee4b21aa5c675fee954be2cf9b92,ab454f444461e5af994243cebd99508e07c5819e,karmooPA,Add KimiaNet feature extractor and input transform,feat(features): add KimiaNet encoder and input transforms
+b142bc2af3827955434e0eff9d74d31c19cccffc,4cb5aeef828d026f9a03a03a8feffc1e067f0a0d,karmooPA,Add batched KimiaNet feature extraction pipeline,feat(features): extract batched embeddings with coordinates
+3d5ad72a788714c29415f331937a653358b83203,8ae08c46e1fa69392e914d4f3968ff3edac5443e,karmooPA,Add MIL HDF5 dataset and dataloader infrastructure,feat(data): add MIL HDF5 dataset and padded dataloaders
+460a355bade892b10ab00867d48f3c855c4b4683,87486aec681a7beed220673879b5bdddc2b3caf8,karmooPA,Add patient-aware train test split infrastructure,feat(data): add stratified patient-aware train and test splits
+d4999aaad1a9620bdb2777dfd0ba56c8367a3dbf,0f16ca1507d8aac57166253f6deeac2d18d6a243,karmooPA,Add reproducible patient-aware cross validation,feat(data): persist reproducible grouped cross-validation folds
+34243886f36a8ddab8b673f641a85ae6f4626b2f,390cc838294317be42d81cbc2232ee6a07cb5b06,karmooPA,feat: implement core AMIL model,feat(mil): implement attention-based multiple instance learning
+4b2a2d783fa946d9bfe3e942116b380227159341,41133bb7adba975118747634874aefa4a5cbcc28,karmooPA,feat: add AMIL validation and weight initialization,feat(mil): validate AMIL inputs and initialize model weights
+64a1954123f842f556e72c426a2bdeffd5196d6e,e4cdcb2c0f05c54c168a36381f63a6037c3d4422,mragetsars,Merge existing MIL infrastructure and AMIL implementation for contract validation,merge(mil): integrate data infrastructure and AMIL contracts
+cf42b2bf648d73c035ec1bdf850b9c3cc84d61c9,e9c7d12536003d9a17e2f901bdfab753ec109397,mragetsars,Add resumable full-cohort preprocessing and independent verification,feat(workflows): process and independently verify full WSI cohorts
+9801697f0412d73e50e33d2d8a8da3d1c5314cce,7c34da00c07ca333632af51764d0fbec7b67e6ed,mragetsars,Preserve and integrate verified server full-cohort pipeline,merge(workflows): integrate verified full-cohort processing
+c4ce4a171ba7fde782ef8788f4e4076e90c38ee1,2b86627be0f04430e3e438fbef5d4264019e6c1f,mragetsars,Validate AMIL with provenance-bound KimiaNet feature caches,feat(validation): bind KimiaNet caches to AMIL acceptance provenance
+214ec7e390158e1454615bef5afc5bdd150ee3ba,115bcb8b8c2afd278fabcd825f5796a3dc8b1170,mragetsars,Record successful server KimiaNet and AMIL pilot acceptance,docs(validation): record real KimiaNet and AMIL pilot acceptance
+dc6018dbc5545ca0f62e98d244624a393c8ac991,98049d2272013186928cb92afe0020f853476a62,karmooPA,feat(amil): implement training loop and unit tests,feat(mil): implement batch and epoch training with unit tests

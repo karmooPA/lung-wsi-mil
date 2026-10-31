@@ -3,19 +3,18 @@
 This module is the augmentation stage on `main`, immediately after the shared
 WSI preprocessing and patch-extraction code. The production pilot runner also
 adds compact HDF5 storage, complete numeric QC, atomic resume validation and an
-independent verifier. KimiaNet feature extraction remains on its separate
-feature branch and is not silently imported into this stage.
+independent verifier. KimiaNet extraction is integrated on `main` as a separate
+feature stage; augmentation does not load the encoder implicitly.
 
 ## Contract and use
 
 ```python
 import numpy as np
-from src.preprocessing.patch_extraction import extract_patch
-from src.augmentation import transform_patch, transform_batch
+from lung_wsi_mil.preprocessing.patch_extraction import extract_patch
+from lung_wsi_mil.augmentation import transform_patch, transform_batch
 
 rng = np.random.default_rng(42)  # create once per run/worker, then reuse
-patch = extract_patch(slide, level0_x=4096, level0_y=4096,
-                      target_downsample=4.0, patch_size=512)
+patch = extract_patch(slide, level0_x=4096, level0_y=4096, target_downsample=4.0, patch_size=512)
 # Obtain target_downsample from preprocess_slide(...)["resolution"], not a
 # universal assumption of 4.0: it depends on the scanned slide's resolution.
 original, aug1, aug2 = transform_patch(patch, rng=rng)
@@ -56,7 +55,7 @@ not modified by the augmentation code.
 
 The accepted WSL pilot uses Python 3.12.3, NumPy 2.3.5, Pillow 12.3.0, scikit-image 0.26.0,
 PyTorch 2.14.0 and torchvision 0.29.0, using CPU execution. Use Python 3.12
-for the pinned dependency set. `requirements-augmentation.txt` includes the
+for the pinned dependency set. The `.[augmentation]` package extra includes the
 existing OpenSlide/Pillow requirements, required array/image/torch libraries,
 and h5py 3.16.0 for required compact pilot storage/validation and the optional
 KimiaNet integration tests.
@@ -65,25 +64,24 @@ KimiaNet integration tests.
 python -m venv .venv
 # Linux/macOS: source .venv/bin/activate
 # PowerShell: .\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements-augmentation.txt
+python -m pip install -e ".[augmentation]"
 python -m unittest discover -s tests -p 'test_augmentation*.py' -v
 ```
 
 For a CPU-only environment, install the matching torch/torchvision pair from
-the official CPU index first, then the requirements file. For CUDA use a
+the official CPU index first, then install the project extra. For CUDA use a
 compatible official PyTorch wheel pair for the intended hardware. The tested
 WSL environment uses the +cpu wheels; GPU execution was not tested.
 
 ```bash
 python -m pip install torch==2.14.0 torchvision==0.29.0 --index-url https://download.pytorch.org/whl/cpu
-python -m pip install -r requirements-augmentation.txt
+python -m pip install -e ".[augmentation]"
 ```
 
 The portable suite now covers augmentation, strict HDF5 schema validation,
 corrupt-resume rejection, chunk-size invariance, synthetic preprocessing,
-source identity and patient-leakage guards. Four KimiaNet tests skip on `main`
-because those modules remain on the separate feature branch. On a temporary
-checkout with KimiaNet `b142bc2`, the feature-specific tests also run:
+source identity and patient-leakage guards. KimiaNet feature modules and their
+tests are integrated on `main`. Coverage includes:
 numeric normalization parity, axis/order preservation, RNG independence and
 repeatability, H/E/D handling, blur semantics, exact rotations/flips, finite
 black/white outputs, strict inputs, empty/singleton batches, the actual
@@ -99,7 +97,7 @@ unit/integration suite; no developer-specific WSI path is required at collection
 
 | Source requirement / ambiguity | Implementation and reason |
 | --- | --- |
-| Task PDF pp. 2-3: ToTensor + ImageNet normalization | Same operations; public API enforces float32. Original matches `src/features/transforms.py` bit for bit in the tested environment. |
+| Task PDF pp. 2-3: ToTensor + ImageNet normalization | Same operations; public API enforces float32. Original matches `src/lung_wsi_mil/features/transforms.py` bit for bit in the tested environment. |
 | PDF p. 3: independent H/E factors N(1, 0.02) | Scalar factors per image; D retained; scikit-image RGB -> HED -> RGB; clip to [0,1], quantize to uint8. No Macenko/stain normalization is added. |
 | Article p. 5 says Gaussian noise addition; PDF p. 4 calls GaussianBlur | Follow the executable brief: blur. `RandomGaussianBlur` has the accurate name; `RandomGaussianNoise` remains a documented compatibility subclass. No additive noise is silently substituted. |
 | PDF passes a length-one ndarray to GaussianBlur | Convert the sampled radius to a Python float. The literal ndarray call fails in tested Pillow 12.3. |
@@ -121,31 +119,32 @@ reproduction**. Blur versus additive noise remains a scientific protocol choice
 for team review; a noise protocol would need a separately specified pixel-scale
 variance and new validation.
 
-## KimiaNet connection and remaining caller work
+## KimiaNet connection
 
-Checked alongside `feature/kimianet-features` commit
-`b142bc2af3827955434e0eff9d74d31c19cccffc` in a temporary checkout. That branch
-is a direct descendant of this preprocessing base with two feature commits.
-No colleague feature code is copied into this patch or altered for the test.
-
-`extract_embeddings` already accepts `[3,N,3,512,512]` and returns `[3,N,1024]`.
-`process_transformed_slide` already writes the aligned embeddings, coordinates,
-slide/case IDs and label. No API change is needed. The missing production piece
-is the caller connecting the existing stages, with a loaded, frozen, eval-mode
-model and real WSIs. In a combined checkout, the handoff is:
+The original batched feature APIs come from karmooPA's `b142bc2` commit and
+remain available on integrated main. `extract_embeddings` accepts
+`[3,N,3,512,512]` and returns `[3,N,1024]`; `process_transformed_slide` writes a
+complete slide group. For a bounded in-memory slide, the API is:
 
 ```python
 import numpy as np
-from src.augmentation import transform_batch
-from src.features.pipeline import process_transformed_slide
+from lung_wsi_mil.augmentation import transform_batch
+from lung_wsi_mil.features.pipeline import process_transformed_slide
 
 # patches: list of actual extract_patch outputs, in coordinates order
 # coordinates: level-zero (x,y) for those patches, not thumbnail coordinates
 transformed = transform_batch(patches, rng=rng)
 coords = np.asarray(coordinates, dtype=np.int64).reshape(-1, 2)
 saved = process_transformed_slide(
-    transformed, coords, model, device, hdf5_path,
-    slide_id, patient_id, label, batch_size=16,
+    transformed,
+    coords,
+    model,
+    device,
+    hdf5_path,
+    slide_id,
+    patient_id,
+    label,
+    batch_size=16,
 )
 ```
 
@@ -154,16 +153,17 @@ TCGA slide barcode as slide_id and the patient grouping ID as case_id; encode
 Normal/Tumor as 0/1 consistently with the supplied labels. For N=0 the existing
 coordinate validator needs shape `(0,2)`; a bare `[]` fails. The example handles
 that without changing the colleague's implementation. `load_kimianet_weights`
-already freezes the model and calls eval; actual weights were not available.
+freezes the model and calls eval. The streaming CLI additionally verifies the
+official checkpoint hash, as documented in the acceptance guide.
 
 The full image tensor alone costs **9 MiB per patch**, roughly 288 MiB at N=32.
 The colleague's `batch_size` limits model inference, not allocation of this
-entire tensor. For large slides, the caller/writer needs a separate streaming
-extension: transform/extract chunks in coordinate order and append into the same
-HDF5 slide datasets. Do not call the current writer repeatedly with the same
-slide_id for successive chunks: it returns False after the first write and
-would drop later chunks. This production streaming work is outside the required
-augmentation API and remains an explicit integration task for the feature owner.
+entire tensor. For large slides, use `lung-wsi-extract` and
+`lung_wsi_mil.features.hdf5_pipeline.extract_feature_cache`. That integrated
+streaming path restores saved augmentation chunks and writes a complete,
+provenance-bound feature cache atomically. Do not call the in-memory slide writer
+repeatedly with the same slide ID: it returns False after the first group and
+would drop later chunks. The streaming implementation avoids that misuse.
 
 ## Visual QC and real-data gate
 
@@ -182,7 +182,6 @@ python scripts/preview_augmentation.py /path/to/tumor_patch_4096_4096.png --seed
 The script verifies shape/dtype/finiteness, denormalizes the three tensors,
 exports a PNG panel and JSON containing the input/output hashes, seed and
 versions. Review stain changes, rotations/flips, tissue structure, edge integrity,
-clipping and blur. The main branch still ends at augmentation storage. KimiaNet
-embeddings and their `[3,N,1024]` feature QC remain a separate next-stage
-integration task. All views of every patient's slides must remain in the same
-future split.
+clipping and blur. The integrated feature stage validates `[3,N,1024]`
+embeddings independently. All views of every patient's slides must remain
+in the same partition; committed patient-aware reference splits are available.

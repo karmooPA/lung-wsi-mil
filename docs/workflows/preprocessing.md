@@ -19,7 +19,7 @@ The pipeline does not save thousands of patch PNG files. It stores Level-0 coord
 ## Single-slide API
 
 ```python
-from src.preprocessing.pipeline import preprocess_slide
+from lung_wsi_mil.preprocessing.pipeline import preprocess_slide
 
 result = preprocess_slide("/path/to/slide.svs")
 print(result["valid_patch_count"])
@@ -31,7 +31,7 @@ print(result["valid_patches"][:5])
 From the repository root:
 
 ```bash
-PYTHONPATH=. python -m src.preprocessing.batch_preprocessing \
+python -m lung_wsi_mil.preprocessing.batch_preprocessing \
   "/path/to/TCGA_LUSC" \
   "/path/to/preprocessing_output"
 ```
