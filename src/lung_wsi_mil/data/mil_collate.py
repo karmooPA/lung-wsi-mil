@@ -4,7 +4,22 @@ import torch
 from torch.nn.utils.rnn import pad_sequence
 
 
-def mil_collate_fn(batch):
+def mil_collate_fn(batch, *, view_indices=None):
+    """Expand selected views; the default preserves Original/Aug1/Aug2.
+
+    Validation and test loaders explicitly pass ``view_indices=(0,)`` so one
+    slide contributes one prediction without augmented test-time views.
+    """
+    if not batch:
+        raise ValueError("Cannot collate an empty MIL batch.")
+    indices = (0, 1, 2) if view_indices is None else tuple(view_indices)
+    if (
+        not indices
+        or len(set(indices)) != len(indices)
+        or any(isinstance(index, bool) or not isinstance(index, int) for index in indices)
+        or any(index not in (0, 1, 2) for index in indices)
+    ):
+        raise ValueError("view_indices must contain distinct indices from (0, 1, 2).")
     bags = []
     coordinates = []
     labels = []
@@ -13,7 +28,9 @@ def mil_collate_fn(batch):
     is_augmented = []
 
     for embeddings, coords, label, slide_id, case_id in batch:
-        for view_index in range(embeddings.shape[0]):
+        if embeddings.shape[0] != 3:
+            raise ValueError("MIL samples must contain Original, Aug1, and Aug2.")
+        for view_index in indices:
             bags.append(embeddings[view_index])
             coordinates.append(coords)
             labels.append(label)

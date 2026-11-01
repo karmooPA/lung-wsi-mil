@@ -1,5 +1,7 @@
 """Mil dataloader utilities."""
 
+from functools import partial
+
 from torch.utils.data import DataLoader, Subset
 
 from lung_wsi_mil.data.mil_collate import mil_collate_fn
@@ -35,13 +37,19 @@ def create_mil_dataloader(
     batch_size,
     shuffle=False,
     num_workers=0,
+    *,
+    view_indices=None,
+    generator=None,
+    worker_init_fn=None,
 ):
     return DataLoader(
         dataset,
         batch_size=batch_size,
         shuffle=shuffle,
         num_workers=num_workers,
-        collate_fn=mil_collate_fn,
+        collate_fn=partial(mil_collate_fn, view_indices=view_indices),
+        generator=generator,
+        worker_init_fn=worker_init_fn,
     )
 
 
