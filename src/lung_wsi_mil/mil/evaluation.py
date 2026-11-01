@@ -54,8 +54,10 @@ def evaluate_model(model, dataloader, *, device=None, threshold=0.5, attention_c
                     probability = float(probability.item())
                     if not 0 <= probability <= 1:
                         raise ValueError("Model probability must be in [0,1].")
-                    if prediction.numel() != 1 or int(prediction.item()) != int(
-                        probability >= threshold
+                    if (
+                        prediction.numel() != 1
+                        or float(prediction.item()) not in (0.0, 1.0)
+                        or float(prediction.item()) != int(probability >= threshold)
                     ):
                         raise ValueError("Model prediction does not match the frozen threshold.")
                     weights = attention.detach().cpu().numpy()

@@ -2,3 +2,5 @@
 pandas==2.3.3
 # 1.8 fixes shuffled StratifiedGroupKFold group-index mapping.
 scikit-learn==1.8.0
+# Headless ROC/PR/confusion plots and spatial attention overlays.
+matplotlib==3.10.8

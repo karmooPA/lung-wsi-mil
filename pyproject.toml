@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lung-wsi-mil"
-version = "0.1.0"
+version = "0.2.0"
 description = "Reproducible TCGA-LUSC preprocessing, KimiaNet features, and attention MIL"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -27,6 +27,8 @@ lung-wsi-verify-pilot = "lung_wsi_mil.workflows.verify_pilot:main"
 lung-wsi-verify-dataset = "lung_wsi_mil.workflows.verify_dataset:main"
 lung-wsi-extract = "lung_wsi_mil.features.extract:main"
 lung-wsi-splits = "lung_wsi_mil.data.generate_splits:main"
+lung-wsi-experiment = "lung_wsi_mil.experiments.cli:main"
+lung-wsi-heatmap = "lung_wsi_mil.visualization.attention:main"
 
 [project.urls]
 Repository = "https://github.com/karmooPA/lung-wsi-mil"
