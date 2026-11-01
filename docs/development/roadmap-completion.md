@@ -1,7 +1,9 @@
 # Roadmap implementation — 2026-11-01
 
-This extension is authored by **mragetsars**, as requested. Existing karmooPA
-and mragetsars work and its history remain intact.
+The **5-Fold training foundation is authored and committed by karmooPA**.
+The remaining roadmap integration, evaluation, visualization and independent
+verification are attributed to **mragetsars**. See the corrected
+[ownership record](ownership.md) and [commit map](roadmap-attribution-correction.json).
 
 | Roadmap item | Implemented behavior |
 | --- | --- |

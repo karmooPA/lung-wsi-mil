@@ -45,9 +45,19 @@ the IDs of the code that actually generated their evidence.
 
 ## Roadmap extension — 2026-11-01
 
-At the user's explicit request, all new commits for the 5-Fold / 5-Seed / Final
-Test / Metrics / Attention / Heatmap extension are authored and committed as
-`mragetsars`. This includes the new evaluation protocol, original-only view
-selection, experiment runner/checkpoints, reporting, spatial rendering and
-their tests/docs. Original AMIL/training/data contributions remain in ancestry
-with their original canonical authors.
+The user clarified that the **5-Fold training part belongs to `karmooPA`**.
+The previously mixed implementation commit was split at the training-module
+boundary, with the following actual author and committer identities:
+
+| Contributor | Roadmap contribution |
+| --- | --- |
+| `karmooPA` | Fold training, validation-based checkpoint selection, early stopping, exact resume and their shared configuration/artifact/RNG support |
+| `mragetsars` | Five-seed orchestration, final held-out evaluation, metrics, attention/heatmaps, independent tests and documentation |
+
+The training foundation is commit
+`2dc71e5835d25e8f09b75a4b75585223e74b56c0`; the remaining workflow integration
+is `7b8f44843e80a3480fa63f0f882d560ee910b1f3`.
+The split preserves every implementation byte, original commit timestamps
+and earlier ancestry. The [attribution map](roadmap-attribution-correction.json)
+records replacement IDs, exact training paths and the previous-delivery backup.
+Original AMIL/training/data contributions retain their canonical authors.

@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "reason": "Explicit user correction: the 5-Fold training part belongs to karmooPA; other roadmap parts remain mragetsars.",
+  "previous_delivery_head": "b0983878c3d75aeb5396eccefc85f1eb61c1e81b",
+  "rewritten_equivalent_head": "7059889e12b3f4f6e581c61da3a8130bc7947064",
+  "fold_training_commit": "2dc71e5835d25e8f09b75a4b75585223e74b56c0",
+  "fold_training_author_and_committer": "karmooPA <kardostmohammad.h.p@gmail.com>",
+  "fold_training_paths": [
+    "src/lung_wsi_mil/experiments/__init__.py",
+    "src/lung_wsi_mil/experiments/artifacts.py",
+    "src/lung_wsi_mil/experiments/config.py",
+    "src/lung_wsi_mil/experiments/fold.py",
+    "src/lung_wsi_mil/experiments/reproducibility.py"
+  ],
+  "workflow_commit": "7b8f44843e80a3480fa63f0f882d560ee910b1f3",
+  "workflow_author_and_committer": "mragetsars <mragetsars@gmail.com>",
+  "source_tree_identical_before_documentation_update": true,
+  "timestamps_preserved": true,
+  "unaffected_ancestry_through": "a2dc2d08041f0f7fbe009d65f76d88f589a5fa44",
+  "historical_result_ids_preserved": true,
+  "previous_delivery_backup": "handoff/roadmap-before-attribution-correction.bundle",
+  "mapping": [
+    {
+      "previous_commit": "4625c91e12d2ad98ab358fa2b5cd6260509eb46a",
+      "replacement_commits": [
+        "2dc71e5835d25e8f09b75a4b75585223e74b56c0",
+        "7b8f44843e80a3480fa63f0f882d560ee910b1f3"
+      ],
+      "reason": "Split fold-training foundation (karmooPA) from five-seed/final-test/attention integration (mragetsars)."
+    },
+    {
+      "previous_commit": "e9cc86fcf2be2617e5e23d07c658790bae515904",
+      "replacement_commits": [
+        "a13adf2ad2ca486abff81cd88e7e75427c2ec15f"
+      ],
+      "reason": "Parent ID changed; tree, message, identity and timestamps preserved."
+    },
+    {
+      "previous_commit": "b0983878c3d75aeb5396eccefc85f1eb61c1e81b",
+      "replacement_commits": [
+        "7059889e12b3f4f6e581c61da3a8130bc7947064"
+      ],
+      "reason": "Parent ID changed; tree, message, identity and timestamps preserved."
+    }
+  ],
+  "real_remote_contacted_or_pushed": false
+}

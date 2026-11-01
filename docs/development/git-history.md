@@ -43,6 +43,29 @@ tokens, credentials, dataset paths or server SSH configuration are copied.
 
 ## Review and publish
 
+### Corrected roadmap attribution
+
+The 5-Fold training foundation now uses `karmooPA` for both author and committer;
+the remaining roadmap work retains `mragetsars`. A mixed implementation commit
+was split without changing implementation bytes. Its descendants have new IDs;
+the [attribution map](roadmap-attribution-correction.json) records the relation.
+The handoff's `roadmap-before-attribution-correction.bundle` preserves the exact
+previously delivered graph and the original IDs referenced in validation evidence.
+
+If remote main is already the **previous roadmap delivery**
+`b0983878c3d75aeb5396eccefc85f1eb61c1e81b`, publish this correction with its exact
+lease after reviewing the new history:
+
+```bash
+git push --force-with-lease=refs/heads/main:b0983878c3d75aeb5396eccefc85f1eb61c1e81b origin main:refs/heads/main
+```
+
+The lease rejects a remote that has advanced since that delivery. Review any
+intervening work rather than weakening the lease. No remote was contacted or
+pushed while preparing this correction.
+
+### Earlier organized or original remote
+
 If the organized base `689763dbed617cf8daf7d4c29b6ff22f6d7f1d39`
 has already been published and remote main has no divergent changes, this
 roadmap extension is a normal fast-forward:

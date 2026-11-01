@@ -142,8 +142,8 @@ TCGA results. See the [experiment protocol and server commands](docs/workflows/e
 
 ## Contributors and Git handoff
 
-- **karmooPA**: original preprocessing, feature APIs, MIL data/splits, AMIL and training.
-- **mragetsars**: cohort audit, augmentation, orchestration, feature-cache provenance and acceptance.
+- **karmooPA**: original preprocessing, feature APIs, MIL data/splits, AMIL and five-fold training with resumable checkpoints.
+- **mragetsars**: cohort audit, augmentation, five-seed orchestration, final evaluation/attention, feature-cache provenance and acceptance.
 
 See [ownership evidence](docs/development/ownership.md),
 [contribution conventions](CONTRIBUTING.md), and the

@@ -1,13 +1,17 @@
 # Roadmap software validation — 2026-11-01
 
 **Scope: synthetic software verification only. No new real-data training or
-diagnostic performance is claimed.** All roadmap implementation commits are
-authored and committed by `mragetsars`.
+diagnostic performance is claimed.** Following the user's attribution correction,
+the 5-Fold training foundation is authored and committed by `karmooPA`;
+the remaining roadmap integration and independent verification use `mragetsars`.
 
 The tested clean source commit is
 `e9cc86fcf2be2617e5e23d07c658790bae515904`, package version `0.2.0`.
-This report is added after that run; its documentation commit does not change
-the tested implementation. The [machine-readable record](roadmap-software-validation-2026-11-01.json)
+This report was added after that run. Subsequent attribution/documentation
+corrections preserve the tested implementation. The original tested ID remains
+in the dated evidence and is recoverable from the handoff's pre-correction
+bundle; the [attribution map](../development/roadmap-attribution-correction.json)
+relates it to the corrected graph. The [machine-readable record](roadmap-software-validation-2026-11-01.json)
 binds the exact implementation hashes, run fingerprint, config, runtime and
 selected output checksums.
 
