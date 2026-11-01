@@ -23,6 +23,8 @@
 
 ## Historical results
 
+- [2026-11-01 roadmap software validation (synthetic only)](results/roadmap-software-validation-2026-11-01.md)
+- [Machine-readable roadmap software validation](results/roadmap-software-validation-2026-11-01.json)
 - [2026-10-02 preprocessing pilot](results/pilot14-2026-10-02.md)
 - [2026-10-17 KimiaNet / AMIL acceptance](results/amil-validation-2026-10-17.md)
 - [Machine-readable acceptance](results/amil-validation-2026-10-17.json)

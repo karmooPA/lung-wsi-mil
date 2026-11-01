@@ -43,6 +43,19 @@ tokens, credentials, dataset paths or server SSH configuration are copied.
 
 ## Review and publish
 
+If the organized base `689763dbed617cf8daf7d4c29b6ff22f6d7f1d39`
+has already been published and remote main has no divergent changes, this
+roadmap extension is a normal fast-forward:
+
+```bash
+git push origin main
+```
+
+The migration helper below is for a remote that still has the original
+pre-organization tips from the supplied ZIP. Its original leases deliberately
+remain unchanged. Do not rerun that migration against an already migrated
+remote or refresh its leases without reviewing intervening work.
+
 Extract the whole repository, including `.git`; do not create a new Git repository
 or copy only visible source files. From the delivered `lung-wsi-mil/` directory:
 

@@ -15,7 +15,9 @@ The end-to-end software test exercises all 25 fits, held-out evaluation, raw
 attention and spatial overlays on synthetic data. A separate interruption test
 checks matching epoch histories and model weights after resume. Other tests
 reject leakage/identity corruption, undefined metrics, stale protocol/checkpoints
-and coordinate mismatches. Final execution evidence is in the handoff reports.
+and coordinate mismatches. The dated [software validation report](../results/roadmap-software-validation-2026-11-01.md)
+records 276 passed tests and the completed public synthetic CLI run; detailed
+logs and labelled sample figures accompany the handoff.
 
 **Real-data execution remains a separate run.** The supplied repository contains
 frozen metadata and historical acceptance evidence, not the full real feature
