@@ -40,9 +40,11 @@ linked in the acceptance procedure. Empty future scaffolds, virtual environments
 bytecode, test caches, copied server-source trees, session refs and SSH settings
 are excluded from the active project. The original ZIP remains their full backup.
 
-## Remaining project work
+## Project work remaining at the organization snapshot
 
 The experiment protocol still needs explicit validation/test view policy,
 per-slide aggregation, model selection and evaluation metrics. Full-cohort
 feature extraction, trained checkpoints, ROC/AUC and attention heatmaps are
 not delivered by this repository cleanup. See the architecture and training guides.
+
+Update: the subsequent [roadmap extension](roadmap-completion.md) implements these experiment/evaluation/heatmap stages. Their real-data execution still requires external inputs.

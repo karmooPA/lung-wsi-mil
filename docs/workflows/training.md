@@ -37,5 +37,6 @@ indexed device is rejected. Keep model and input dtypes compatible.
 
 The real AMIL + variable-length HDF5/DataLoader integration test verifies an
 optimizer update. It uses synthetic embeddings and does not measure clinical
-classification performance. Validation epochs, early stopping, checkpoint
-selection, ROC/AUC and a complete experiment CLI remain future work.
+classification performance. Validation, early stopping, checkpoint selection,
+five-fold/five-seed training, held-out metrics and attention/heatmaps are now
+implemented in the [complete experiment workflow](experiments.md).

@@ -17,6 +17,9 @@ and 153 patients with both tissue labels. Grouping by patient is mandatory.
 | `features` | Genuine frozen KimiaNet, bounded streaming and provenance | One feature HDF5 group per slide |
 | `data` | Dataset, padding, patient partitions and reference folds | Five-return Dataset / six-return collate |
 | `mil` | AMIL, initialization, padding removal, loss and training | Three-return model and scalar training metrics |
+| `experiments` | Frozen 5×5 fitting, checkpoint selection/resume and final testing | Config/input snapshots, selected weights and stage manifests |
+| `evaluation` | Slide-level metrics and patient-cluster uncertainty | Exact prediction/metric/curve JSON and CSV |
+| `visualization` | Headless metric figures and source-aligned attention | PNG/SVG plots, raw weights, coverage and spatial overlays |
 | `workflows` | Cohort selection, locking, staging, resume and independent verification | Per-run control files and per-slide artifacts |
 
 The package owns reusable implementation. Scripts only expose legacy commands
@@ -39,8 +42,9 @@ paths explicitly when no source checkout is available.
 | AMIL output | `(Y_prob, Y_hat, A)` with `[1, 1]`, `[1, 1]`, `[1, N]` |
 
 Each of the three views remains a distinct training bag; the original collate
-API is preserved. Validation/test view selection and any per-slide aggregation
-must be fixed by the future experiment protocol before reporting metrics.
+API is preserved. The experiment runner explicitly selects Original-only
+validation/test views, fixes its threshold/config before testing, and selects
+checkpoints/folds solely on validation. See the [experiment protocol](workflows/experiments.md).
 
 ## Reproducibility
 
@@ -54,3 +58,5 @@ source paths and bytes, hence fingerprints. New runs need new output directories
 historical outputs remain associated with their generating code. The supplied
 historical acceptance proves 14 slides / 42 view forwards; no fresh real-data
 acceptance, trained checkpoint or diagnostic metric is asserted by this cleanup.
+
+The 2026-11-01 roadmap extension adds the full experiment/heatmap implementation. Its synthetic software checks do not constitute a new real-cohort acceptance or a reported diagnostic metric.

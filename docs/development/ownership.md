@@ -42,3 +42,12 @@ on the actual objects, not only hidden by `.mailmap`. Conventional subjects are
 specific to each original change. The [commit map](commit-map.csv) records every
 old/new object ID and original/new subject. Historical reports intentionally keep
 the IDs of the code that actually generated their evidence.
+
+## Roadmap extension — 2026-11-01
+
+At the user's explicit request, all new commits for the 5-Fold / 5-Seed / Final
+Test / Metrics / Attention / Heatmap extension are authored and committed as
+`mragetsars`. This includes the new evaluation protocol, original-only view
+selection, experiment runner/checkpoints, reporting, spatial rendering and
+their tests/docs. Original AMIL/training/data contributions remain in ancestry
+with their original canonical authors.

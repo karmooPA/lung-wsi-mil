@@ -23,9 +23,11 @@ from one patient must remain in the same data partition.
 | KimiaNet cache | Genuine checkpoint validation and provenance-bound streaming extraction |
 | MIL data | HDF5 Dataset, padded collate, grouped splits, five-seed / five-fold reference CSVs |
 | AMIL | Three-output model, initialization, numerical and integration tests |
-| Training | Batch and epoch optimization, binary cross-entropy, explicit padding removal |
+| Training | Complete five-fold × five-seed AMIL runner, validation selection, early stopping and resumable checkpoints |
+| Final test / metrics | Original-only held-out evaluation, AUROC/AP, patient bootstrap and reproducible PNG/SVG reports |
+| Attention / heatmaps | Every test slide's raw attention plus source-aligned maps, coverage and thumbnail overlays |
 | Historical real data | [14-WSI / 42-view acceptance](docs/results/amil-validation-2026-10-17.md) |
-| Still to implement | Experiment runner, validation/model selection, trained checkpoints, ROC/AUC and heatmaps |
+| Execution scope | Full synthetic software acceptance is available; new real-cohort training requires external features and preprocessing artifacts |
 
 The historical acceptance checks an initialized model's interface and numerical
 behavior. It does not establish trained classification performance. Raw WSIs,
@@ -100,6 +102,30 @@ Commands accept `--help`. Existing `scripts/*.py` launchers remain available;
 their importable implementations now live in `lung_wsi_mil`. Old Python imports
 under `src.*` should be changed to `lung_wsi_mil.*`.
 
+## Complete the training/evaluation roadmap
+
+```bash
+lung-wsi-experiment validate --features /external/features/full-kimianet.h5 --config configs/amil-reference.json
+lung-wsi-experiment run --features /external/features/full-kimianet.h5 --config configs/amil-reference.json --device cuda --patch-root /external/TCGA_LUSC_HDF --output ../lung-wsi-mil-outputs/amil-reference
+```
+
+Use `--device cpu` with the CPU runtime. `train` and `test` can run separately;
+`--resume` verifies/reuses the same experiment and continues interrupted epochs.
+The default trains all 25 models, selects on validation only and evaluates one
+frozen model per seed. Validation/test use Original views only. All outputs stay
+outside Git; the source model, preprocessing rules and frozen splits are preserved.
+
+For a complete software check without real data:
+
+```bash
+lung-wsi-experiment smoke --output ../lung-wsi-mil-outputs/software-smoke
+```
+
+That creates synthetic inputs and runs every stage; its metrics are not real
+TCGA results. See the [experiment protocol and server commands](docs/workflows/experiments.md),
+[roadmap implementation status](docs/development/roadmap-completion.md), and
+[reference config](configs/amil-reference.json).
+
 ## Repository map
 
 | Path | Purpose |
@@ -110,6 +136,7 @@ under `src.*` should be changed to `lung_wsi_mil.*`.
 | `metadata/source/` | Byte-preserved frozen source documents |
 | `metadata/` | Committed cohort inventory and recorded evidence summaries |
 | `splits/` | Frozen patient-aware reference partitions |
+| `configs/` | Explicit, frozen experiment defaults |
 | `requirements/` | Single-source pinned dependency components |
 | `docs/` | [Guide index](docs/README.md), architecture, workflows and dated results |
 

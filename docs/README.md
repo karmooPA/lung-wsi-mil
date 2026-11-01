@@ -18,6 +18,8 @@
 - [Full-cohort processing](workflows/full-dataset.md)
 - [KimiaNet / AMIL real-data acceptance](workflows/amil-validation.md)
 - [Batch and epoch training](workflows/training.md)
+- [Complete 5×5 experiment and heatmaps](workflows/experiments.md)
+- [Roadmap implementation status](development/roadmap-completion.md)
 
 ## Historical results
 

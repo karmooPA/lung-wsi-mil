@@ -1,0 +1,25 @@
+{
+  "seeds": [
+    2,
+    3,
+    5,
+    7,
+    11
+  ],
+  "folds": 5,
+  "epochs": 100,
+  "patience": 10,
+  "min_delta": 0.0001,
+  "learning_rate": 0.0001,
+  "weight_decay": 1e-05,
+  "batch_size": 2,
+  "num_workers": 0,
+  "num_threads": 2,
+  "attention_dim": 128,
+  "threshold": 0.5,
+  "device": "cpu",
+  "bootstrap_resamples": 1000,
+  "heatmap_limit": 6,
+  "heatmap_max_size": 1024,
+  "allow_unverified_features": false
+}
