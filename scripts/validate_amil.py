@@ -21,6 +21,10 @@ from pathlib import Path
 import torch
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+# Direct script execution starts with scripts/ on sys.path. The discovered
+# acceptance tests also import the scripts package, so expose its parent even
+# when the caller has no PYTHONPATH and runs from another working directory.
+sys.path.insert(0, str(PROJECT_ROOT))
 DATA_REGRESSIONS = (
     "tests/test_mil_hdf5_dataset.py",
     "tests/test_mil_collate.py",
