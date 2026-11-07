@@ -21,6 +21,7 @@ def main(argv=None):
         "user.email": IDENTITIES[args.identity],
         "user.useConfigOnly": "true",
         "core.hooksPath": ".githooks",
+        "commit.template": ".gitmessage.txt",
         "core.autocrlf": "false",
         "core.safecrlf": "true",
         "fetch.prune": "true",

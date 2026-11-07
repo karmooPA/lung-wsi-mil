@@ -1,0 +1,8 @@
+# <type>(<scope>): <imperative summary>
+#
+# Describe the change and why it is needed when the subject is not enough.
+# Record validation or evidence when it helps the reviewer.
+#
+# Types: feat, fix, refactor, docs, test, build, chore, ci, perf, style, revert, merge.
+# Scopes: audit, preprocessing, augmentation, features, data, mil, training,
+# evaluation, experiments, visualization, workflows, git, repo.

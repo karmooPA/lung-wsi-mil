@@ -1,7 +1,7 @@
 """Exercise the actual identity policy and lease plan without network calls."""
 
 import pytest
-from scripts.git_policy import identity_errors, subject_errors
+from scripts.git_policy import commit_identity_errors, identity_errors, subject_errors
 from scripts.push_reorganized import push_command
 
 
@@ -25,9 +25,19 @@ def test_aliases_and_mismatched_ownership_are_rejected(name, email):
     assert identity_errors(name, email, "Committer")
 
 
+def test_each_commit_uses_one_contributor_identity():
+    assert commit_identity_errors(
+        "mragetsars", "mragetsars@gmail.com", "karmooPA", "kardostmohammad.h.p@gmail.com"
+    )
+    assert not commit_identity_errors(
+        "mragetsars", "mragetsars@gmail.com", "mragetsars", "mragetsars@gmail.com"
+    )
+
+
 def test_empty_or_ambiguous_subjects_are_rejected():
     assert subject_errors("")
     assert subject_errors("Update stuff")
+    assert subject_errors("fix: count distinct slides per epoch")
     assert not subject_errors("fix(mil): count distinct slides per epoch")
 
 
