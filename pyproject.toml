@@ -30,6 +30,7 @@ lung-wsi-extract = "lung_wsi_mil.features.extract:main"
 lung-wsi-splits = "lung_wsi_mil.data.generate_splits:main"
 lung-wsi-experiment = "lung_wsi_mil.experiments.cli:main"
 lung-wsi-heatmap = "lung_wsi_mil.visualization.attention:main"
+lung-wsi-deliver-folds = "lung_wsi_mil.workflows.fold_delivery:main"
 
 [project.urls]
 Repository = "https://github.com/karmooPA/lung-wsi-mil"

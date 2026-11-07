@@ -116,13 +116,11 @@ retraining or changing the primary results. That historical supplement is not
 part of the default pipeline. Source-aligned attention shows relative patch
 weights within a slide; it does not identify tumor boundaries.
 
-The dated reports retain their original execution paths. The server migration
-preserves compatibility aliases for those paths. The November 3 primary run now
-resides in `output/reference-20261103/experiment-reference/`; the November 4
-supplement, reports and heatmap examples are in `output/all-fold-tests-20261104/`,
-`output/reports-20261104/` and `output/heatmap-examples-20261104/`. Use a new run
-name for new work. The migration did not change the recorded results or rename
-the paths inside their frozen metadata.
+The dated reports retain their original execution paths. Previous results now
+live under `archive/historical-output-20261107/`, including the primary run,
+all-fold supplement and all 141 original seed-2 heatmaps. Use the canonical
+`derived/features/kimianet.h5` and `derived/patches/` paths when accessing
+archived inputs.
 
-The complete 141-slide seed-2 heatmap export lives in
-`output/seed2-heatmaps-20261107/`, with its prediction index and per-slide images.
+For an output tree organized by individual seed and fold, use the
+[all-fold delivery workflow](all-fold-delivery.md).
