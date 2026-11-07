@@ -17,6 +17,7 @@ authors = [
 dynamic = ["dependencies", "optional-dependencies"]
 
 [project.scripts]
+lung-wsi-pipeline = "lung_wsi_mil.workflows.workspace:main"
 lung-wsi-audit = "lung_wsi_mil.audit.inventory:main"
 lung-wsi-validate-sources = "lung_wsi_mil.audit.sources:main"
 lung-wsi-preprocess = "lung_wsi_mil.preprocessing.batch_preprocessing:main"
