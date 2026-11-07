@@ -14,7 +14,7 @@ IDENTITIES = {
 }
 SUBJECT = re.compile(
     r"(?:build|chore|ci|docs|feat|fix|merge|perf|refactor|revert|style|test)"
-    r"(?:\([a-z0-9][a-z0-9-]*\))?!?: \S.*"
+    r"\([a-z0-9][a-z0-9-]*\)!?: \S.*"
 )
 
 
@@ -36,6 +36,16 @@ def subject_errors(subject):
     )
 
 
+def commit_identity_errors(author, author_email, committer, committer_email):
+    errors = [
+        *identity_errors(author, author_email, "Author"),
+        *identity_errors(committer, committer_email, "Committer"),
+    ]
+    if (author, author_email) != (committer, committer_email):
+        errors.append("Author and committer must use the same contributor identity.")
+    return errors
+
+
 def check_history(revision="HEAD"):
     """Inspect raw identities, rather than hiding aliases through .mailmap."""
     errors = []
@@ -43,8 +53,7 @@ def check_history(revision="HEAD"):
     for row in rows:
         commit, author, author_email, committer, committer_email, subject = row.split("\t", 5)
         issues = [
-            *identity_errors(author, author_email, "Author"),
-            *identity_errors(committer, committer_email, "Committer"),
+            *commit_identity_errors(author, author_email, committer, committer_email),
             *subject_errors(subject),
         ]
         errors.extend(f"{commit[:12]}: {issue}" for issue in issues)
@@ -52,14 +61,14 @@ def check_history(revision="HEAD"):
 
 
 def check_pending_commit(message_path):
-    errors = []
+    identities = []
     for role in ("AUTHOR", "COMMITTER"):
         ident = git("var", f"GIT_{role}_IDENT")
         match = re.fullmatch(r"(.*?) <(.*?)> \d+ [+-]\d{4}", ident)
         if match is None:
-            errors.append(f"Cannot parse {role.lower()} identity")
-        else:
-            errors.extend(identity_errors(*match.groups(), role.capitalize()))
+            return [f"Cannot parse {role.lower()} identity"]
+        identities.extend(match.groups())
+    errors = commit_identity_errors(*identities)
     lines = Path(message_path).read_text(encoding="utf-8").splitlines()
     errors.extend(subject_errors(lines[0] if lines else ""))
     return errors

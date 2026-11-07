@@ -17,8 +17,9 @@ python scripts/configure_git.py mragetsars
 python scripts/configure_git.py karmooPA
 ```
 
-This changes only repository-local settings and enables the checked-in commit
-hook. Author **and** committer must use one canonical pair:
+This changes only repository-local settings, enables the checked-in commit
+hook and selects the [commit template](.gitmessage.txt). Author **and** committer
+must use the same canonical pair for each commit.
 
 | Name | Email |
 | --- | --- |
@@ -33,12 +34,15 @@ attribution; it does not create a cryptographic signature or establish authorshi
 
 ## Branches and commits
 
-`main` is the integrated branch. Start short-lived branches such as
-`feat/mil-validation`, `fix/pilot-resume`, `refactor/data-contracts` or
-`docs/experiment-protocol`. Delete completed feature branches after integration.
-Existing completed work is retained through `archive/*` tags.
+`main` is the integrated branch and the checkout to use for current runs. Start
+short-lived branches such as `feat/mil-validation`, `fix/pilot-resume`,
+`refactor/data-contracts` or `docs/experiment-protocol` from `main`. Retain the
+numbered `pipeline/*` branches as fixed references to the integrated stages
+listed in the [pipeline history](docs/development/pipeline-history.md).
+The `archive/*` tags preserve milestones from the earlier organization.
 
-Use a specific Conventional Commit subject:
+Use the commit template for a specific Conventional Commit subject. In the
+body, record why the change was made and what verified it when useful:
 
 ```text
 feat(mil): add patient-level validation metrics
