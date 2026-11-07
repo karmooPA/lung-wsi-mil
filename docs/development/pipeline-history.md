@@ -24,6 +24,7 @@ supported checkouts for a new run.
 | `pipeline/13-real-run` | [`7e8a2b0`](https://github.com/karmooPA/lung-wsi-mil/commit/7e8a2b03365978a08693857995f8809f4a5b7df0) | `mragetsars` | Launcher fix and exact source commit used for the completed server run |
 | `pipeline/14-results` | [`57495fe`](https://github.com/karmooPA/lung-wsi-mil/commit/57495fe2325423284b4d8cbfcb66bf16d00a98e0) | `mragetsars` | Primary real-cohort report (`f5795ff`) and supplementary all-25 report (`57495fe`) |
 | `pipeline/15-workspace-runner` | [784cf7e](https://github.com/karmooPA/lung-wsi-mil/commit/784cf7e870efe3cd24670bc7f29c1ef1873d0abb) | `mragetsars` | Portable pipeline command, workspace configuration and ordered workflow guide |
+| pipeline/16-all-test-heatmaps | [b51d85b](https://github.com/karmooPA/lung-wsi-mil/commit/b51d85b7b271936ae156065f35e1e9fba6ebe017) | mragetsars | Complete held-out heatmap coverage in the workspace command |
 
 The author and committer column names the identity on the **tip commit**. A
 branch also includes ancestors from earlier work by both contributors. See the
@@ -45,7 +46,7 @@ The existing history contains these merge commits:
 | [f2ed877](https://github.com/karmooPA/lung-wsi-mil/commit/f2ed877c00295cbf5755a1223b82fab6a8e9691e) | Verified real-run launcher (stage 13) |
 | [0bee5f1](https://github.com/karmooPA/lung-wsi-mil/commit/0bee5f17000df910ac63113ac1c8b4b9e94cd297) | Real-run and all-fold reports (stage 14) |
 | [3c001eb](https://github.com/karmooPA/lung-wsi-mil/commit/3c001eb82ed064bcad06712d4de3d1e28c6b90d3) | Structured workspace runner (stage 15) |
-
+| [1cf6e57](https://github.com/karmooPA/lung-wsi-mil/commit/1cf6e57db7f27b02d34420899c28270b18b51a27) | Complete held-out heatmaps (stage 16) |
 
 Verified features, evaluation metrics, five-fold training and five-seed testing
 entered main as ordinary commits. The verified launcher and the two real
@@ -68,7 +69,7 @@ committer and subject fields satisfy the repository policy:
 set -e
 python scripts/git_policy.py --revision origin/main
 set -- $(git for-each-ref --format='%(refname:short)' refs/remotes/origin/pipeline/)
-test "$#" -eq 15
+test "$#" -eq 16
 for stage do
   git merge-base --is-ancestor "$stage" origin/main
   printf '%s %s\n' "$stage" "$(git rev-parse --short "$stage")"

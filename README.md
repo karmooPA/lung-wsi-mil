@@ -25,13 +25,14 @@ from one patient must remain in the same data partition.
 | AMIL | Three-output model, initialization, numerical and integration tests |
 | Training | Complete five-fold × five-seed AMIL runner, validation selection, early stopping and resumable checkpoints |
 | Final test / metrics | Original-only held-out evaluation, AUROC/AP, patient bootstrap and reproducible PNG/SVG reports |
-| Attention / heatmaps | Every test slide's raw attention plus source-aligned maps, coverage and thumbnail overlays |
-| Historical real data | [14-WSI / 42-view acceptance](docs/results/amil-validation-2026-10-17.md) |
-| Execution scope | Full synthetic software acceptance is available; new real-cohort training requires external features and preprocessing artifacts |
+| Attention / heatmaps | Raw attention for every test slide, with source-aligned maps, coverage and overlays for selected examples |
+| Real-data validation | [14-WSI / 42-view acceptance](docs/results/amil-validation-2026-10-17.md) and [694-slide CUDA experiment](docs/results/full-cohort-run-2026-11-03.md) |
+| All-fold results | [Supplementary held-out tests of all 25 frozen checkpoints](docs/results/all-fold-tests-2026-11-04.md) |
 
-The historical acceptance checks an initialized model's interface and numerical
-behavior. It does not establish trained classification performance. Raw WSIs,
-KimiaNet weights and real feature caches are external inputs.
+The 14-slide acceptance checks the model interface and numerics. The later
+full-cohort experiment reports trained, internal held-out results for the five
+models selected on validation. All-fold testing is a separate descriptive
+supplement. Raw WSIs, KimiaNet weights and generated artifacts stay outside Git.
 
 ## Install
 
@@ -84,7 +85,21 @@ Source relocation changes code/provenance fingerprints. Keep accepted historical
 outputs as evidence and use a new output location for the reorganized pipeline;
 old caches must not be made current by editing their fingerprints.
 
-## Run
+## Run the pipeline
+
+With the package installed and the external `Data/` folder prepared, run the
+full experiment from an existing verified feature cache:
+
+```powershell
+lung-wsi-pipeline --data-root 'D:\Meraj Rastegar\Data' --run-name 'amil-reference-new' --start-at features --device cuda
+```
+
+Use `--start-at raw` for raw slides or `--start-at patches` for preprocessed
+patch views. The workflow uses the checked-in inventory, reference configuration
+and patient splits. See the [pipeline workflow](docs/workflows/pipeline.md) for
+setup, the input layout, verification and outputs.
+
+## Run individual stages
 
 ```bash
 lung-wsi-validate-sources
@@ -102,7 +117,7 @@ Commands accept `--help`. Existing `scripts/*.py` launchers remain available;
 their importable implementations now live in `lung_wsi_mil`. Old Python imports
 under `src.*` should be changed to `lung_wsi_mil.*`.
 
-## Complete the training/evaluation roadmap
+## Run training and evaluation separately
 
 ```bash
 lung-wsi-experiment validate --features /external/features/full-kimianet.h5 --config configs/amil-reference.json
@@ -146,10 +161,11 @@ TCGA results. See the [experiment protocol and server commands](docs/workflows/e
 - **mragetsars**: cohort audit, augmentation, five-seed orchestration, final evaluation/attention, feature-cache provenance and acceptance.
 
 See [ownership evidence](docs/development/ownership.md),
+[the ordered pipeline stages](docs/development/pipeline-history.md),
 [contribution conventions](CONTRIBUTING.md), and the
 [history rewrite / force-push guide](docs/development/git-history.md).
-The delivered checkout includes its complete `.git` directory. No remote push
-was performed during organization.
+The dated result reports record the execution commits and the branches that
+publish the curated evidence.
 
 The source code retains its original [MIT license](LICENSE). KimiaNet weights
 retain their separate upstream agreement, linked in the AMIL guide.

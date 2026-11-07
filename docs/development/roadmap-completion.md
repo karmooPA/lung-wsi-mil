@@ -21,11 +21,14 @@ and coordinate mismatches. The dated [software validation report](../results/roa
 records 276 passed tests and the completed public synthetic CLI run; detailed
 logs and labelled sample figures accompany the handoff.
 
-**Real-data execution remains a separate run.** The supplied repository contains
-frozen metadata and historical acceptance evidence, not the full real feature
-cache, raw WSIs or pretrained weights. The new smoke test does not replace that
-evidence and provides no real diagnostic AUC. The implementation is ready for
-the documented server commands once those external inputs are supplied.
+At the time of the November 1 software check, real-data execution remained a
+separate step. The [November 3 real run](../results/full-cohort-run-2026-11-03.md)
+later completed all 25 fits and the five primary held-out tests; the
+[November 4 supplement](../results/all-fold-tests-2026-11-04.md) evaluated all
+25 frozen checkpoints separately. The repository contains the frozen metadata
+and reports; the real feature cache, raw WSIs and pretrained weights remain
+external. The November 1 smoke test itself reports synthetic results only.
 
-See [the complete experiment guide](../workflows/experiments.md) and the explicit
+See [the pipeline guide](../workflows/pipeline.md), the
+[experiment protocol](../workflows/experiments.md) and the explicit
 [reference configuration](../../configs/amil-reference.json).

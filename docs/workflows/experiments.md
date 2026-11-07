@@ -4,10 +4,12 @@ This workflow implements the remaining roadmap: **5-Fold Training → 5 Seeds �
 Final Test → AUC / Metrics → Attention / Heatmap**. It uses the existing frozen
 patient-aware partitions and the unchanged AMIL three-output architecture.
 
-Implementation is complete. Software acceptance uses synthetic embeddings and
-synthetic geometry. A new real TCGA-LUSC training run requires the external full
-feature cache and source preprocessing artifacts; no real AUC is claimed by the
-software-smoke result.
+The [November 3 CUDA run](../results/full-cohort-run-2026-11-03.md) trained 25
+models on the full 694-slide cohort and evaluated the five validation-selected
+checkpoints. The [November 4 supplementary run](../results/all-fold-tests-2026-11-04.md)
+also evaluated all 25 frozen checkpoints without changing the primary result.
+For a new real run, use the [pipeline workflow](pipeline.md) or supply the
+external full feature cache and preprocessing artifacts to the commands below.
 
 ## Freeze the protocol before looking at test results
 
@@ -139,10 +141,10 @@ interruption resume. A run lock prevents concurrent writers. Normal interrupts
 release it; after a hard process kill, establish that no writer remains before
 removing its stale `run.lock`. Temporary stage files are not complete results.
 
-CPU is the tested execution device here. CUDA/MPS code paths are available when
-the runtime supports the requested deterministic operations, but were not run
-on unavailable hardware. Deterministic settings do not promise identical
-floating-point results across different hardware or library versions.
+The software acceptance exercised CPU, and the recorded real full-cohort run
+used CUDA. MPS is available when the runtime supports the requested deterministic
+operations. Deterministic settings do not promise identical floating-point
+results across different hardware or library versions.
 
 ## Metrics and figures
 
