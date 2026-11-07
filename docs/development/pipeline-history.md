@@ -25,6 +25,7 @@ supported checkouts for a new run.
 | `pipeline/14-results` | [`57495fe`](https://github.com/karmooPA/lung-wsi-mil/commit/57495fe2325423284b4d8cbfcb66bf16d00a98e0) | `mragetsars` | Primary real-cohort report (`f5795ff`) and supplementary all-25 report (`57495fe`) |
 | `pipeline/15-workspace-runner` | [784cf7e](https://github.com/karmooPA/lung-wsi-mil/commit/784cf7e870efe3cd24670bc7f29c1ef1873d0abb) | `mragetsars` | Portable pipeline command, external workspace layout and input validation |
 | `pipeline/16-all-test-heatmaps` | [b51d85b](https://github.com/karmooPA/lung-wsi-mil/commit/b51d85b7b271936ae156065f35e1e9fba6ebe017) | `mragetsars` | Complete held-out heatmap coverage in the workspace command |
+| `pipeline/17-complete-pair-delivery` | [1b4fe00](https://github.com/karmooPA/lung-wsi-mil/commit/1b4fe004ca0040027b0a6c4a282610544c49ec41) | `mragetsars` | Sealed results, complete test heatmaps and reports for all seed/fold pairs |
 
 The author and committer column names the identity on the **tip commit**. A
 branch also includes ancestors from earlier work by both contributors. See the
@@ -69,7 +70,7 @@ committer and subject fields satisfy the repository policy:
 set -e
 python scripts/git_policy.py --revision origin/main
 set -- $(git for-each-ref --format='%(refname:short)' refs/remotes/origin/pipeline/)
-test "$#" -eq 16
+test "$#" -eq 17
 for stage do
   git merge-base --is-ancestor "$stage" origin/main
   printf '%s %s\n' "$stage" "$(git rev-parse --short "$stage")"
