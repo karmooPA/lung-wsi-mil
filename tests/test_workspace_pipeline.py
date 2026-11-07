@@ -32,6 +32,7 @@ def test_raw_check_routes_new_derivatives_away_from_accepted_artifacts(
     result = json.loads(capsys.readouterr().out)
     assert result["slides"] == 694
     assert result["seeds"] == [2, 3, 5, 7, 11]
+    assert result["heatmaps_per_seed"] == {"2": 141, "3": 139, "5": 138, "7": 141, "11": 140}
     assert result["paths"]["patches"] == str(tmp_path / "derived" / "runs" / "qa" / "patches")
     assert marker.read_text(encoding="utf-8") == "accepted"
     assert not (tmp_path / "output").exists()
