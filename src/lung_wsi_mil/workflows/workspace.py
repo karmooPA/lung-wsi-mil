@@ -95,7 +95,7 @@ def run(args):
     args.inventory = args.inventory.expanduser().resolve(strict=True)
     args.config = args.config.expanduser().resolve(strict=True)
     config = ExperimentConfig.from_json(args.config)
-    config = replace(config, device=args.device or config.device)
+    config = replace(config, device=args.device or config.device, heatmap_limit=args.heatmap_limit)
     if config.allow_unverified_features or config.device not in ("cpu", "cuda"):
         raise ValueError("Workspace runs require verified features and a cpu or cuda device.")
     if config.device == "cuda" and not torch.cuda.is_available():
@@ -121,9 +121,21 @@ def run(args):
         if args.start_at == "features" and partitions is not None
         else None
     )
+
+    def heatmap_counts():
+        if args.no_heatmaps:
+            return {str(seed): 0 for seed in config.seeds}
+        return {
+            str(seed): min(len(partitions[seed]["test"]), config.heatmap_limit)
+            if config.heatmap_limit
+            else len(partitions[seed]["test"])
+            for seed in config.seeds
+        }
+
     if args.check_only:
         return {
             "status": "validated",
+            "heatmaps_per_seed": heatmap_counts(),
             "start_at": args.start_at,
             "slides": len(metadata),
             "patients": int(metadata.patient_id.nunique()),
@@ -146,6 +158,7 @@ def run(args):
         "config_sha256": hash_file(args.config),
         "device": config.device,
         "heatmaps": not args.no_heatmaps,
+        "heatmap_limit": config.heatmap_limit,
         "workers": args.workers,
         "feature_batch_size": args.feature_batch_size,
         "input_feature_sha256": feature_info["sha256"] if feature_info else None,
@@ -248,6 +261,8 @@ def run(args):
                 config.device,
                 "--output",
                 paths["experiment"],
+                "--heatmap-limit",
+                config.heatmap_limit,
             ]
             if not args.no_heatmaps:
                 experiment_args += ["--patch-root", paths["patches"]]
@@ -258,12 +273,18 @@ def run(args):
             report = read_json(summary_path)
             if report["status"] != "complete":
                 raise ValueError("Experiment did not produce a complete test report.")
+            counts = heatmap_counts()
+            if {str(seed["seed"]): seed["heatmaps"] for seed in report["seeds"]} != counts:
+                raise ValueError(
+                    "Test heatmap coverage differs from the requested per-seed counts."
+                )
             phase = "complete"
             result = {
                 "output": str(run_root),
                 "summary": str(summary_path),
                 "training_fits": report["completed_training_fits"],
                 "test_seeds": report["completed_test_seeds"],
+                "heatmaps_per_seed": counts,
                 "feature_sha256": feature_info["sha256"],
             }
             status("complete", **result)
@@ -280,7 +301,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--run-name", required=True)
-    parser.add_argument("--start-at", choices=("raw", "patches", "features"), default="features")
+    parser.add_argument("--start-at", choices=("raw", "patches", "features"), default="raw")
     parser.add_argument(
         "--inventory", type=Path, default=PROJECT_ROOT / "metadata/dataset_inventory.csv"
     )
@@ -291,6 +312,9 @@ def main(argv=None):
     parser.add_argument("--device", choices=("cpu", "cuda"))
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--feature-batch-size", type=int, default=8)
+    parser.add_argument(
+        "--heatmap-limit", type=int, default=0, help="Maximum per seed; 0 renders every test slide."
+    )
     parser.add_argument("--no-heatmaps", action="store_true")
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument("--resume", action="store_true")
@@ -300,6 +324,8 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if min(args.workers, args.feature_batch_size) < 1:
         parser.error("--workers and --feature-batch-size must be positive.")
+    if args.heatmap_limit < 0:
+        parser.error("--heatmap-limit must be nonnegative.")
     try:
         report = run(args)
     except KeyboardInterrupt:
